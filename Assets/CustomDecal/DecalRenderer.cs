@@ -36,20 +36,9 @@ public partial class DecalRenderer : MonoBehaviour {
     buf.GetTemporaryRT(normalsID, -1, -1);
     buf.Blit(BuiltinRenderTextureType.GBuffer2, normalsID);
 
-
-    buf.SetRenderTarget(BuiltinRenderTextureType.GBuffer0, BuiltinRenderTextureType.CameraTarget);
-    foreach (var decal in decals.Where(d => d.kind == Decal.Kind.DiffuseOnly)) {
-      buf.DrawMesh(mesh, decal.transform.localToWorldMatrix, decal.mat);
-    }
-
-    buf.SetRenderTarget (BuiltinRenderTextureType.GBuffer2, BuiltinRenderTextureType.CameraTarget);
-    foreach (var decal in decals.Where(d => d.kind == Decal.Kind.NormalsOnly)) {
-      buf.DrawMesh(mesh, decal.transform.localToWorldMatrix, decal.mat);
-    }
-
     RenderTargetIdentifier[] mrt = {BuiltinRenderTextureType.GBuffer0, BuiltinRenderTextureType.GBuffer2};
     buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
-    foreach (var decal in decals.Where(d => d.kind == Decal.Kind.Both)) {
+    foreach (var decal in decals) {
       buf.DrawMesh(mesh, decal.transform.localToWorldMatrix, decal.mat);
     }
 
