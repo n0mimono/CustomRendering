@@ -1,6 +1,6 @@
 ﻿// http://docs.unity3d.com/ja/current/Manual/GraphicsCommandBuffers.html
 
-Shader "Creative01/Blur" {
+Shader "GrabBlur/Blur" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
   }
