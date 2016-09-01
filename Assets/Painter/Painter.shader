@@ -13,7 +13,7 @@
       ZWrite Off
       Blend SrcAlpha OneMinusSrcAlpha
 
-			CGPROGRAM
+      CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 
@@ -73,11 +73,16 @@
         }
         float2 uv0 = opos.xz + 0.5;
 
-        half3 normal = tex2D(_NormalsCopy, uv).rgb;
+        half4 normal = tex2D(_NormalsCopy, uv);
         fixed3 wnormal = normal.rgb * 2.0 - 1.0;
 
         if (_ClipOrientation) {
           clip (dot(wnormal, i.orientation) - 0.3);
+        }
+
+        // pseudo-stencil
+        if (normal.a == 0) {
+          discard;
         }
 
         clip (tex2D (_MainTex, uv0).a - 0.2);
@@ -90,7 +95,7 @@
         fixed3 nor = UnpackNormal(tex2D(_BumpMap, uv0));
         half3x3 norMat = half3x3(i.orientationX, i.orientationZ, i.orientation);
         nor = mul (nor, norMat);
-        outNormal = fixed4(nor*0.5+0.5,1);
+        outNormal = fixed4(nor*0.5+0.5,0);
  			}
 			ENDCG
 		}
