@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class PaintBallSpawner : MonoBehaviour {
+  public bool autoSpawn;
   public PaintBall prefab;
 
   public float maxForce;
@@ -13,7 +14,7 @@ public class PaintBallSpawner : MonoBehaviour {
   public Transform targetForward;
 
   IEnumerator Start() {
-    while (true) {
+    while (autoSpawn) {
       yield return StartCoroutine (Spawn ());
       yield return null;
 
@@ -35,6 +36,14 @@ public class PaintBallSpawner : MonoBehaviour {
     yield return null;
     float force = Random.value * (maxForce - minForce) + minForce;
     ball.AddForce (transform.forward * force);
+  }
+
+  public void StartSpawn() {
+    StartCoroutine (Spawn ());
+  }
+
+  public void Reload() {
+    UnityEngine.SceneManagement.SceneManager.LoadScene (0);
   }
 
 }
