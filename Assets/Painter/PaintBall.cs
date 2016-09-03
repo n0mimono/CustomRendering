@@ -12,7 +12,7 @@ public class PaintBall : MonoBehaviour {
   public void OnCollisionEnter(Collision col) {
     ContactPoint contact = col.contacts[0];
 
-    paint.transform.SetParent (null);
+    paint.transform.SetParent (transform.parent);
     paint.transform.position = contact.point;
     paint.gameObject.SetActive (true);
 

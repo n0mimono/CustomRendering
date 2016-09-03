@@ -4,6 +4,7 @@ using System.Collections;
 public class PaintBallSpawner : MonoBehaviour {
   public bool autoSpawn;
   public PaintBall prefab;
+  public Transform paintPool;
 
   public float maxForce;
   public float minForce;
@@ -30,6 +31,7 @@ public class PaintBallSpawner : MonoBehaviour {
 
     yield return null;
     PaintBall ball = Instantiate (prefab);
+    ball.transform.SetParent (paintPool);
     ball.transform.position = transform.position;
     ball.gameObject.SetActive (true);
 

@@ -2,6 +2,7 @@
 	Properties {
     _Color ("Color", Color) = (1,1,1,1)
     _SpecularGloss ("Specular Gloss", Color) = (1,1,1,1)
+    _Emission ("Emission", Color) = (0,0,0,0)
 		_MainTex ("Texture", 2D) = "white" {}
     _BumpMap ("Normals", 2D) = "bump" {}
 
@@ -42,6 +43,8 @@
 
       float4 _Color;
       float4 _SpecularGloss;
+      float4 _Emission;
+
       sampler2D _MainTex;
       sampler2D _BumpMap;
       sampler2D_float _CameraDepthTexture;
@@ -53,7 +56,8 @@
 			void frag (v2f i,
         out half4 outDiffuse  : COLOR0,
         out half4 outSpecular : COLOR1,
-        out half4 outNormal   : COLOR2
+        out half4 outNormal   : COLOR2,
+        out half4 outEmission : COLOR3
       ) {
 
         // reconstruction
@@ -85,6 +89,7 @@
           discard;
         }
 
+        // diffuse
         clip (tex2D (_MainTex, uv0).a - 0.2);
         fixed4 col = _Color;
         outDiffuse = col;
@@ -92,10 +97,14 @@
         // fixed specular
         outSpecular = _SpecularGloss;
 
+        // normal
         fixed3 nor = UnpackNormal(tex2D(_BumpMap, uv0));
         half3x3 norMat = half3x3(i.orientationX, i.orientationZ, i.orientation);
         nor = mul (nor, norMat);
         outNormal = fixed4(nor*0.5+0.5,0);
+
+        // fixed emission
+        outEmission = _Emission;
  			}
 			ENDCG
 		}

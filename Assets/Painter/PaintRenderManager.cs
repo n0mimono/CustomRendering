@@ -70,11 +70,11 @@ public class PaintRenderManager : MonoBehaviour {
     var normalsID = Shader.PropertyToID("_NormalsCopy");
     buf.GetTemporaryRT(normalsID, -1, -1);
     buf.Blit(BuiltinRenderTextureType.GBuffer2, normalsID);
-
     RenderTargetIdentifier[] mrt = {
       BuiltinRenderTextureType.GBuffer0, // albedo
       BuiltinRenderTextureType.GBuffer1, // specular
-      BuiltinRenderTextureType.GBuffer2  // normal
+      BuiltinRenderTextureType.GBuffer2, // normal
+      BuiltinRenderTextureType.GBuffer3  // emission
     };
     buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
     foreach (var paint in paints.Where(p => p.IsActive)) {
