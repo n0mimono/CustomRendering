@@ -11,3 +11,5 @@
 /*.pidb
 /*.booproj
 
+/Assets/CGIncludes/
+/Assets/CGIncludes.meta
