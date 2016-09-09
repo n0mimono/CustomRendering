@@ -1,4 +1,4 @@
-﻿Shader "Test/DeferredSimple" {
+﻿Shader "Test/DeferredUnlit" {
   Properties {
     _Albedo ("Albedo", Color) = (1,1,1,1)
     _Specular ("Specular", Color) = (1,1,1,1)
@@ -9,7 +9,6 @@
     LOD 100
 
     Pass {
-      Tags { "LightMode" = "Deferred" }
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag
