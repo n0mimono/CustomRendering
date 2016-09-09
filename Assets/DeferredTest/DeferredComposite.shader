@@ -1,6 +1,7 @@
 ﻿Shader "Test/DeferredComposite" {
   Properties {
-    [Enum(Depth,1,Albedo,2,Specular,3,Normal,4,Emission,5)] _Target ("Target", Float) = 1
+    _MainTex ("Texture", 2D) = "white" {}
+    [Enum(Main,0,Depth,1,Albedo,2,Specular,3,Normal,4,Emission,5)] _Target ("Target", Float) = 1
   }
   SubShader {
     Cull Off ZWrite Off ZTest Always
@@ -20,6 +21,8 @@
       sampler2D _CameraGBufferTexture2;
       sampler2D _CameraGBufferTexture3;
 
+      sampler2D _MainTex;
+
       fixed4 frag (v2f_img i) : SV_Target {
 
         float  depth    = Linear01Depth(tex2D(_CameraDepthTexture, i.uv.xy).r);
@@ -38,9 +41,9 @@
           return normal;
         } else if (_Target == 5) {
           return emission;
-        }
+        } 
 
-        return float4(1,0,0,1);
+        return tex2D(_MainTex, i.uv);
       }
       ENDCG
     }

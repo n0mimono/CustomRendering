@@ -1,4 +1,4 @@
-﻿Shader "Test/DeferredTest" {
+﻿Shader "Test/DeferredSimple" {
   Properties {
     _Albedo ("Albedo", Color) = (1,1,1,1)
     _Specular ("Specular", Color) = (1,1,1,1)
