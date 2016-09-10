@@ -27,7 +27,7 @@
       }
 
       float3 toWorldNormal(float3 n) {
-        return mul(unity_ObjectToWorld, float4(n,0)).xyz;
+        return normalize(mul(unity_ObjectToWorld, float4(n,0)).xyz);
       }
 
 			struct v2f {
