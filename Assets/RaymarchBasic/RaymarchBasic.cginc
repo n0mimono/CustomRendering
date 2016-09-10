@@ -67,7 +67,7 @@ float3 pointToNormal(float3 p){
   ));
 }
 
-float3x3 orthFunc(float3 n) {
+float3x3 normToOrth(float3 n) {
   float3 n2 = n;
   float3 n1 = normalize(float3(0,1,0) - n2.y * n2);
   float3 n0 = cross(n2, n1);
@@ -158,7 +158,7 @@ void frag_raymarch (v2f_raymarch i,
   float2 uv = UV_FUNC(rayPos);
 
   float3 localBump = UnpackNormal(tex2D(_BumpTex, TRANSFORM_TEX(uv, _BumpTex)));
-  float3 worldBump = mul(localBump, orthFunc(worldNormal));
+  float3 worldBump = mul(localBump, normToOrth(worldNormal));
 
   outAlbedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex));
   outSpecular = _SpecularGloss;

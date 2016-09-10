@@ -1,7 +1,7 @@
 ﻿// Upgrade NOTE: replaced '_CameraToWorld' with 'unity_CameraToWorld'
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "CustomLight"{
+Shader "Test/CustomLight"{
   SubShader
   {
     Tags { "Queue"="Transparent-1" }

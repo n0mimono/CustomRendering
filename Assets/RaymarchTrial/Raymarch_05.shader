@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Raymarch_05_Primitive" {
+﻿Shader "Raymarch/Trial/Raymarch_05_Primitive" {
   Properties {
     [Enum(Sphere,0,Box,1)] _Model ("Model", Float) = 0
 

@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Raymarch_02_Normal" {
+﻿Shader "Raymarch/Trial/Raymarch_02_Normal" {
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 100

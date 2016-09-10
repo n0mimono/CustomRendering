@@ -1,4 +1,4 @@
-﻿Shader "PaintStandard"
+﻿Shader "Paint/PaintStandard"
 {
   Properties
   {

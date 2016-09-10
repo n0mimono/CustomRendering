@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Raymarch_10_Texture" {
+﻿Shader "Raymarch/Trial/Raymarch_10_Texture" {
   Properties {
     [Enum(Sphere,0,Box,1,Torus,2,Custom,3)] _Model ("Model", Float) = 0
     [Toggle] _UseRepeat ("Use Repeat", Float) = 0

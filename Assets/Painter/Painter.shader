@@ -1,4 +1,4 @@
-﻿Shader "Painter" {
+﻿Shader "Paint/Painter" {
 	Properties {
     _Color ("Color", Color) = (1,1,1,1)
     _SpecularGloss ("Specular Gloss", Color) = (1,1,1,1)

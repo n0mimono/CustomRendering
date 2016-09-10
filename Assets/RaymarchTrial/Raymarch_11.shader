@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Raymarch_11_Hex" {
+﻿Shader "Raymarch/Trial/Raymarch_11_Hex" {
   Properties {
     [Enum(Sphere,0,Box,1,Torus,2,Hex,3,Custom,4)] _Model ("Model", Float) = 0
     [Toggle] _UseRepeat ("Use Repeat", Float) = 0
@@ -30,7 +30,6 @@
   }
 
   CGINCLUDE
-    #include "noiseSimplex.cginc"
     float _UseBundleRepeat;
 
     float mod(float x, float y) {
