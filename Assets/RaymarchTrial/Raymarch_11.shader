@@ -24,11 +24,21 @@
 
     [Header(Textures)]
     _MainTex ("Texture", 2D) = "white" {}
+
+    [Header(Framework)]
+    [Toggle] _UseBundleRepeat ("Use Bundle Repeat", Float) = 0
   }
 
   CGINCLUDE
+    #include "noiseSimplex.cginc"
+    float _UseBundleRepeat;
+
     float mod(float x, float y) {
       return x - y * floor(x/y);
+    }
+
+    float2 mod(float2 x, float y) {
+      return float2(mod(x.r,y), mod(x.g,y));
     }
 
     float3 mod(float3 x, float y) {
@@ -36,7 +46,12 @@
     }
 
     float3 repeat(float3 p, float m) {
-      return mod(p, m) - m * 0.5;
+      if (_UseBundleRepeat == 1) {
+        float2 q = mod(p.xz, m) - m * 0.5;
+        return float3(q.x, p.y, q.y);
+      } else {
+        return mod(p, m) - m * 0.5;
+      }
     }
 
     float smin(float a, float b, float r) {
