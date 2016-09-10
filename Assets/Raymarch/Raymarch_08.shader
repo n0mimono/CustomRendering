@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Raymarch_08_MinMax" {
+﻿Shader "Raymarch/Raymarch_08_Custom" {
   Properties {
     [Enum(Sphere,0,Box,1,Torus,2,Custom,3)] _Model ("Model", Float) = 0
     [Toggle] _UseRepeat ("Use Repeat", Float) = 0
@@ -7,9 +7,9 @@
     _ClipThreshold ("Clip Threshold", Float) = 0.01
 
     [Header(Spehre Option)]
-    _SphereSize ("Sphere Size", Float) = 0.5
+    _SphereSize ("Sphere Size", Vector) = (1,1,1,1)
     [Header(Box Option)]
-    _BoxSize ("Box Size", Float) = 0.5
+    _BoxSize ("Box Size", Vector) = (1,1,1,1)
     [Header(Torus Option)]
     _TorusParams ("Toras Params", Vector) = (1,1,0,0)
     [Header(Custom Option)]
@@ -18,6 +18,7 @@
     [Header(Extra Option)]
     _RepeatClamp ("Repeat Clamp", Float) = 1
     _SmoothExpansion ("Smooth Expansion", Float) = 0
+    _RayDamp ("Ray Damp", Float) = 1
   }
 
   CGINCLUDE
@@ -39,6 +40,38 @@
 
     float smax(float a, float b, float r) {
       return log(exp(r * a) + exp(r * b)) / r;
+    }
+
+    // https://wgld.org/d/glsl/g017.html
+    float3 rotate(float3 p, float angle, float3 axis){
+      float3 a = normalize(axis);
+      float s = sin(angle);
+      float c = cos(angle);
+      float r = 1.0 - c;
+      float3x3 m = float3x3(
+        a.x * a.x * r + c,
+        a.y * a.x * r + a.z * s,
+        a.z * a.x * r - a.y * s,
+        a.x * a.y * r - a.z * s,
+        a.y * a.y * r + c,
+        a.z * a.y * r + a.x * s,
+        a.x * a.z * r + a.y * s,
+        a.y * a.z * r - a.x * s,
+        a.z * a.z * r + c
+      );
+      return mul(m, p);
+    }
+
+    // https://wgld.org/d/glsl/g017.html
+    float3 twist(float3 p, float power){
+      float s = sin(power * p.y);
+      float c = cos(power * p.y);
+      float3x3 m = float3x3(
+          c, 0, -s,
+          0, 1,  0,
+          s, 0,  c
+       );
+      return mul(m, p);
     }
 
     float funcSphere(float3 p, float3 r) {
@@ -68,17 +101,17 @@
       return repeat(p, _RepeatClamp);
     }
 
-    float _SphereSize;
-    float _BoxSize;
+    float4 _SphereSize;
+    float4 _BoxSize;
     float4 _TorusParams;
     float4 _CustomParams;
 
     float distFuncSphere(float3 p) {
-      return funcSphere(p, _SphereSize);
+      return funcSphere(p, _SphereSize.xyz / _SphereSize.w);
     }
 
     float distFuncBox(float3 p) {
-      return funcBox(p, _BoxSize);
+      return funcBox(p, _BoxSize.xyz / _BoxSize.w);
     }
 
     float distFuncTorus(float3 p) {
@@ -86,7 +119,8 @@
     }
 
     float distFuncCustom(float3 p) {
-      return smax(-distFuncTorus(p), distFuncBox(p), 10);
+      p = rotate(twist(p, _CustomParams.x), _CustomParams.y, normalize(float3(1,1,1)));
+      return smax(-distFuncTorus(p), distFuncBox(p), _CustomParams.z);
     }
 
     float _Model;
@@ -108,6 +142,7 @@
 
     float _ModelClip;
     float _ClipThreshold;
+    float _RayDamp;
   ENDCG
 
 	SubShader {
@@ -123,7 +158,7 @@
       #define DIST_FUNC distFunc
 
       float3 normalFunc(float3 p){
-        float d = 0.0001;
+        float d = 0.001;
         return normalize(float3(
           DIST_FUNC(p + float3(  d, 0.0, 0.0)) - DIST_FUNC(p + float3( -d, 0.0, 0.0)),
           DIST_FUNC(p + float3(0.0,   d, 0.0)) - DIST_FUNC(p + float3(0.0,  -d, 0.0)),
@@ -179,10 +214,12 @@
         float dist = 0;
         for (int i = 0; i < 64; i++) {
           dist = DIST_FUNC(rayPos);
-          rayPos += ray * dist;
+          rayPos += ray * dist * _RayDamp;
         }
+        clip(0.01 - dist);
+        if (isnan(dist)) discard;
 
-        float d = abs(dist);
+        float d = dist;
         if (_ModelClip == 1) {
           d = funcSphere(rayPos, scaler() * 0.5);
         } else if (_ModelClip == 2) {
@@ -192,6 +229,7 @@
 
         float3 localNormal = normalFunc(rayPos);
         float3 worldNormal = toWorldNormal(localNormal);
+
         return fixed4(worldNormal * 0.5 + 0.5,1);
 			}
 			ENDCG
