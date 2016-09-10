@@ -36,6 +36,7 @@ float smax(float a, float b, float r) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // 
 // Basic raymarch functions
+// ref: http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -168,10 +169,6 @@ float distFuncTrial(float3 p) {
   return opSub(d1, d2, 7.11);
 }
 
-#ifndef DIST_FUNC
-#define DIST_FUNC distFuncTrial
-#endif
-
 // uv functions
 
 float2 uvFuncBasic(float3 p) {
@@ -199,10 +196,6 @@ float2 uvFuncBox(float3 p) {
     return float2(p.x, p.y);
   }
 }
-
-#ifndef UV_FUNC
-#define UV_FUNC uvFuncBox
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 #endif // RAYMARCH_MODULES

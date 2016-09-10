@@ -12,6 +12,22 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifndef RAY_ITERATION
+#define RAY_ITERATION 64
+#endif
+
+#ifndef CLIP_THRESHOLD
+#define CLIP_THRESHOLD 0.01
+#endif
+
+#ifndef DIST_FUNC
+#define DIST_FUNC distFuncTrial
+#endif
+
+#ifndef UV_FUNC
+#define UV_FUNC uvFuncBox
+#endif
+
 float  _ModelClip;
 float  _RayDamp;
 float4 _LocalOffset;
@@ -20,14 +36,6 @@ sampler2D _MainTex; float4 _MainTex_ST;
 sampler2D _BumpTex; float4 _BumpTex_ST;
 float4    _SpecularGloss;
 float4    _Emission;
-
-#ifndef RAY_ITERATION
-#define RAY_ITERATION 64
-#endif
-
-#ifndef CLIP_THRESHOLD
-#define CLIP_THRESHOLD 0.01
-#endif
 
 /* // Property example
   Properties {
