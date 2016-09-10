@@ -11,7 +11,7 @@ public class DeferredUnlitRenderer : MonoBehaviour {
   public Material mat;
 
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer>();
-  private static readonly CameraEvent TargetCameraEvent = CameraEvent.BeforeGBuffer;
+  private static readonly CameraEvent TargetCameraEvent = CameraEvent.AfterGBuffer;
 
   private void CleanUp() {
     foreach (var buf in buffers.Where(b => b.Key != null)) {
@@ -55,7 +55,7 @@ public class DeferredUnlitRenderer : MonoBehaviour {
   }
 
   public void Reconstruct(CommandBuffer buf) {
-    
+
     RenderTargetIdentifier[] mrt = {
       BuiltinRenderTextureType.GBuffer0, // albedo
       BuiltinRenderTextureType.GBuffer1, // specular
