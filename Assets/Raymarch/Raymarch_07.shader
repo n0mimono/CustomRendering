@@ -1,6 +1,6 @@
 ﻿Shader "Raymarch/Raymarch_07_More" {
   Properties {
-    [Enum(Sphere,0,Box,1)] _Model ("Model", Float) = 0
+    [Enum(Sphere,0,Box,1,Torus,2)] _Model ("Model", Float) = 0
     [Toggle] _UseRepeat ("Use Repeat", Float) = 0
 
     [Enum(None,0,Sphere,1,Box,2)] _ModelClip ("Model Clip", Float) = 0
@@ -10,6 +10,9 @@
     _SphereSize ("Sphere Size", Float) = 0.5
     [Header(Box Option)]
     _BoxSize ("Box Size", Float) = 0.5
+    [Header(Torus Option)]
+    _TorusParams ("Toras Params", Vector) = (1,1,0,0)
+
     [Header(Extra Option)]
     _RepeatClamp ("Repeat Clamp", Float) = 1
     _SmoothExpansion ("Smooth Expansion", Float) = 0
@@ -45,6 +48,10 @@
       return funcBox(p, float3(b,b,b));
     }
 
+    float funcTorus(float3 p, float4 t) {
+      return length(float2(length(p.xy) - t.x, p.z)) - t.y;
+    }
+
     float _RepeatClamp;
 
     float3 trans(float3 p) {
@@ -53,6 +60,7 @@
 
     float _SphereSize;
     float _BoxSize;
+    float4 _TorusParams;
 
     float distFuncSphere(float3 p) {
       return funcSphere(p, _SphereSize);
@@ -60,6 +68,10 @@
 
     float distFuncBox(float3 p) {
       return funcBox(p, _BoxSize);
+    }
+
+    float distFuncTorus(float3 p) {
+      return funcTorus(p, _TorusParams);
     }
 
     float _Model;
@@ -72,6 +84,7 @@
       float dist = 1;
       if      (_Model == 0) dist = distFuncSphere(p);
       else if (_Model == 1) dist = distFuncBox(p);
+      else if (_Model == 2) dist = distFuncTorus(p);
 
       dist -= _SmoothExpansion;
       return dist;
