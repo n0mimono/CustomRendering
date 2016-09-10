@@ -69,7 +69,7 @@ float3 pointToNormal(float3 p){
 
 float3x3 normToOrth(float3 n) {
   float3 n2 = n;
-  float3 n1 = normalize(float3(0,1,0) - n2.y * n2);
+  float3 n1 = normalize(normalize(float3(0.15,1.24,0.89)) - n2.y * n2);
   float3 n0 = cross(n2, n1);
   return float3x3(n0, n1, n2);
 }
