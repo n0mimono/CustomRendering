@@ -1,6 +1,6 @@
 # CustomRendering
 
-Rendering Practice
+Rendering practice
 
 ## Raymarch
 
