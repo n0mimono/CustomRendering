@@ -48,6 +48,11 @@ float3 trRepeat(float3 p, float m) {
   return mod(p, m) - m * 0.5;
 }
 
+float3 trRepeat1(float3 p, float m) {
+  float q = mod(p.y, m) - m * 0.5;
+  return float3(p.x, q, p.z);
+}
+
 float3 trRepeat2(float3 p, float m) {
   float2 q = mod(p.xz, m) - m * 0.5;
   return float3(q.x, p.y, q.y);
