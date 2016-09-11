@@ -2,15 +2,15 @@
 
 Rendering Practice
 
+## Raymarch
+
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_0.jpg" width="960">
+
 ## Painting
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_1.jpg" width="960">
 
 https://n0mimono.github.io/CustomRendering/
-
-## Raymarch
-
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_0.jpg" width="960">
 
 ---
 
