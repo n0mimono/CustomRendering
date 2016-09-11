@@ -50,6 +50,7 @@
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
+      #define NORMAL_PRECISION 0.01
       #include "RaymarchBasic.cginc"
     ENDCG
 

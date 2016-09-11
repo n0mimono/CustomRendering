@@ -1,11 +1,7 @@
-﻿Shader "Raymarch/Ground" {
+﻿Shader "Raymarch/Sample/Sample05" {
   Properties {
-    _Height ("Height", Float) = 1
-    _Noise ("Noise", Float) = 0.5
-
-    //_Size ("Size", Vector) = (1,1,1,1)
-    //_Bailout ("Bailout", Float) = 1
-    //_Power ("Power", Float) = 1
+    _Bailout ("Bailout", Float) = 1
+    _Power ("Power", Float) = 1
 
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -24,36 +20,40 @@
 		LOD 100
 
     CGINCLUDE
-      float _Height;
-      float _Noise;
+      #define ITERATION 4
+      float _Bailout;
+      float _Power;
 
-      //float4 _Size;
-      //float _Bailout;
-      //float _Power;
-
-      #define FRAC_ITERATION 3
       #include "RaymarchModules.cginc"
       float distFunc(float3 p) {
-        float d2 = sdBox(p, float3(0.5, _Height, 0.5));
-        float3 q = trTrans(trRepeat2n(p, 0.5, _Noise), float3(0,_Noise,0));
-        float d3 = sdBox(q, float3(0.2, _Height, 0.2));
-        float dx = opUni(d2, d3);
-        return dx;
+        // http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
+        float3 z = p;
+        float dr = 1;
+        float r = 0;
+        for (int i = 0; i < ITERATION; i++) {
+          r = length(z);
+          if (r > _Bailout) break;
+    
+          float theta = acos(z.z/r);
+          float phi = atan2(z.y, z.x);
+          dr = pow(r, _Power-1)*_Power*dr + 1;
 
-        //float3 r = trScale(p, _Size.xyz / _Size.w);
-        //r = trTrans(r, float3(-0.7,0,-1));
-        //float d7 = sdFractalMandelbulb(r, _Bailout, _Power);
-        //return opUni(dx, d7, 30);
+          float zr = pow(r, _Power);
+          theta = theta * _Power;
+          phi = phi * _Power;
+    
+          z = zr*float3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+          z += p;
+        }
+        return 0.5*log(r)*r/dr;
       }
 
       float2 uvFunc(float3 p) {
-        return uvFuncBasic(p);
+        return uvFuncSphere(p);
       }
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
-      #define RAY_ITERATION 128
-      #define NORMAL_PRECISION 0.05
       #include "RaymarchBasic.cginc"
     ENDCG
 

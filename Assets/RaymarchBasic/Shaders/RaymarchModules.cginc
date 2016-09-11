@@ -180,7 +180,9 @@ float sdTriangle(float3 p, float4 h) {
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////
 // distance funcsion examples
+////////////////////////////////
 
 float distFuncSphere(float3 p) {
   return sdSphere(p, 0.5);
@@ -205,7 +207,9 @@ float distFuncTrial(float3 p) {
   return opSub(d1, d2, 7.11);
 }
 
+////////////////////////////////
 // uv functions
+////////////////////////////////
 
 float2 uvFuncBasic(float3 p) {
   return float2(p.x + p.y, p.z - p.x);
@@ -241,9 +245,44 @@ float2 uvFuncBox(float3 p) {
 
 float3 trRepeat2p(float3 p, float m, float d) {
   if (mod(floor(p.x / m) + floor(p.z / m), d) == 0) return p;
+  return trRepeat2(p, m);
+}
 
-  float2 q = mod(p.xz, m) - m * 0.5;
-  return float3(q.x, p.y, q.y);
+float3 trRepeat2n(float3 p, float m, float d) {
+  float n = snoise(floor(p.xz / m));
+  p.y += n * d;
+  return trRepeat2(p, m);
+}
+
+////////////////////////////////
+// fractal
+// ref: http://blog.hvidtfeldts.net
+////////////////////////////////
+
+#ifndef FRAC_ITERATION
+#define FRAC_ITERATION 5
+#endif
+
+float sdFractalMandelbulb(float3 p, float bailout, float power) {
+  float3 z = p;
+  float dr = 1;
+  float r = 0;
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    r = length(z);
+    if (r > bailout) break;
+
+    float theta = acos(z.z/r);
+    float phi = atan2(z.y, z.x);
+    dr = pow(r, power-1)*power*dr + 1;
+
+    float zr = pow(r, power);
+    theta = theta * power;
+    phi = phi * power;
+
+    z = zr*float3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+    z += p;
+  }
+  return 0.5*log(r)*r/dr;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

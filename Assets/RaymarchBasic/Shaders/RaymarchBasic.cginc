@@ -32,6 +32,11 @@
 #define USE_UNSCALE 1
 #endif
 
+#ifndef NORMAL_PRECISION
+#define NORMAL_PRECISION 0.001
+#endif
+
+
 float  _ModelClip;
 float  _RayDamp;
 float4 _LocalOffset;
@@ -65,7 +70,7 @@ float4    _Emission;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 float3 pointToNormal(float3 p){
-  float d = 0.001;
+  float d = NORMAL_PRECISION;
   return normalize(float3(
     DIST_FUNC(p + float3(  d, 0.0, 0.0)) - DIST_FUNC(p + float3( -d, 0.0, 0.0)),
     DIST_FUNC(p + float3(0.0,   d, 0.0)) - DIST_FUNC(p + float3(0.0,  -d, 0.0)),
