@@ -40,10 +40,25 @@ float smax(float a, float b, float r) {
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////
 // transformations
+////////////////////////////////
 
 float3 trRepeat(float3 p, float m) {
-    return mod(p, m) - m * 0.5;
+  return mod(p, m) - m * 0.5;
+}
+
+float3 trRepeat2(float3 p, float m) {
+  float2 q = mod(p.xz, m) - m * 0.5;
+  return float3(q.x, p.y, q.y);
+}
+
+float3 trScale(float3 p, float3 a) {
+  return p * a;
+}
+
+float3 trTrans(float3 p, float3 t) {
+  return p + t;
 }
 
 float3 trRotate(float3 p, float angle, float3 axis){
@@ -76,7 +91,9 @@ float3 trTwist(float3 p, float power){
   return mul(m, p);
 }
 
+////////////////////////////////
 // operations
+////////////////////////////////
 
 float opUni(float d1, float d2) {
   return min(d1, d2);
@@ -102,7 +119,7 @@ float opInt(float d1, float d2, float r) {
   return smax(d1, d2, r);
 }
 
-float opDsp(float d1, float d2) {
+float opDisp(float d1, float d2) {
   return d1 + d2;
 }
 
@@ -110,7 +127,9 @@ float opSmooth(float d, float s) {
   return d - s;
 }
 
+////////////////////////////////
 // primitives
+////////////////////////////////
 
 float sdSphere(float3 p, float3 r) {
   return length(p/r) - 1;
@@ -137,6 +156,18 @@ float sdHex(float3 p, float4 h) {
   float3 q = abs(p.xyz);
   return max(max(q.x + q.z*0.577, q.z*1.154) - h.x, q.y - h.y);
 }
+
+float sdCylinder(float3 p, float4 h) {
+  float2 d = abs(float2(length(p.xz), p.y)) - h.xy;
+  return min(max(d.x, d.y), 0) + length(max(d, 0));
+}
+
+float sdTriangle(float3 p, float4 h) {
+  float3 q = abs(p);
+  return max(q.y-h.y, max(q.x*0.866+p.z*0.5, -p.z) - h.x*0.5);
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -195,6 +226,19 @@ float2 uvFuncBox(float3 p) {
   } else {
     return float2(p.x, p.y);
   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// Additional raymarch functions
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+float3 trRepeat2p(float3 p, float m, float d) {
+  if (mod(floor(p.x / m) + floor(p.z / m), d) == 0) return p;
+
+  float2 q = mod(p.xz, m) - m * 0.5;
+  return float3(q.x, p.y, q.y);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

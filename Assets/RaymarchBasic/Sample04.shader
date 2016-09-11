@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Sample/Sample01" {
+﻿Shader "Raymarch/Sample/Sample04" {
   Properties {
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -16,11 +16,26 @@
 		Tags { "RenderType"="Opaque" }
 		LOD 100
 
+    CGINCLUDE
+      #include "RaymarchModules.cginc"
+      float distFunc(float3 p) {
+        float d3 = sdTriangle(p, float4(0.5,0.5,0,0));
+        return d3;
+      }
+
+      float2 uvFunc(float3 p) {
+        return uvFuncBasic(p);
+      }
+
+      #define DIST_FUNC distFunc
+      #define UV_FUNC uvFunc
+      #define USE_UNSCALE 0
+      #include "RaymarchBasic.cginc"
+    ENDCG
+
 		Pass {
       Tags { "LightMode" = "Deferred" }
 			CGPROGRAM
-      #include "RaymarchModules.cginc"
-      #include "RaymarchBasic.cginc"
 			#pragma vertex vert_raymarch
 			#pragma fragment frag_raymarch
      	ENDCG

@@ -28,9 +28,14 @@
 #define UV_FUNC uvFuncBox
 #endif
 
+#ifndef USE_UNSCALE
+#define USE_UNSCALE 1
+#endif
+
 float  _ModelClip;
 float  _RayDamp;
 float4 _LocalOffset;
+float4 _LocalTangent;
 
 sampler2D _MainTex; float4 _MainTex_ST;
 sampler2D _BumpTex; float4 _BumpTex_ST;
@@ -48,6 +53,7 @@ float4    _Emission;
     [Header(Framework)]
     _RayDamp ("Ray Damp", Float) = 1
     _LocalOffset ("Local Offset", Vector) = (0,0,0,0)
+    _LocalTangent ("Local Tangent", Vector) = (0.15,1.24,0.89,0)
     [Enum(Sphere,1,Box,2)] _ModelClip ("Model Clip", Float) = 1
   }
 */
@@ -67,19 +73,16 @@ float3 pointToNormal(float3 p){
   ));
 }
 
-float3x3 normToOrth(float3 n) {
-  float3 n2 = n;
-  float3 n1 = normalize(normalize(float3(0.15,1.24,0.89)) - n2.y * n2);
-  float3 n0 = cross(n2, n1);
-  return float3x3(n0, n1, n2);
-}
-
 float3 unscaler() {
+  #if USE_UNSCALE
   return float3(
     length(unity_WorldToObject[0].xyz),
     length(unity_WorldToObject[1].xyz),
     length(unity_WorldToObject[2].xyz)
     );
+  #else
+  return float3(1,1,1);
+  #endif
 }
 
 float3 scaler() {
@@ -95,6 +98,16 @@ float3 toWorldNormal(float3 n) {
   float3 u = n * unscaler();
   float3 v = mul(unity_ObjectToWorld, float4(u,0)).xyz;
   return normalize(v);
+}
+
+float3x3 normToOrth(float3 n) {
+  float3 localTangent = normalize(_LocalTangent.xyz + float3(0,0.1,0));
+  float3 worldTangent = toWorldNormal(localTangent);
+
+  float3 n2 = n;
+  float3 n1 = normalize(worldTangent - n2.y * n2);
+  float3 n0 = cross(n2, n1);
+  return float3x3(n0, n1, n2);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

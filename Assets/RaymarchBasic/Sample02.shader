@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Sample02" {
+﻿Shader "Raymarch/Sample/Sample02" {
   Properties {
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -9,6 +9,7 @@
      [Header(Framework)]
     _RayDamp ("Ray Damp", Float) = 1
     _LocalOffset ("Local Offset", Vector) = (0,0,0,0)
+    _LocalTangent ("Local Tangent", Vector) = (0.15,1.24,0.89,0)
     [Enum(Sphere,1,Box,2)] _ModelClip ("Model Clip", Float) = 1
   }
  	SubShader {
@@ -20,7 +21,7 @@
       float distFunc(float3 p) {
         float d0 = sdSphere(p, 2);
         float d1 = sdBox(p, 2);
-        float d2 = sdBox(trRepeat(p, 1 + sin(_Time.y) * 0.5), 0.2);
+        float d2 = sdBox(trRepeat(p, 1 + sin(_Time.x) * 0.5), 0.2);
 
         return opInt(opSub(d2, d1), d0);
       }
