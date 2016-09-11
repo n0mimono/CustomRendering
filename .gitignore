@@ -11,5 +11,10 @@
 /*.pidb
 /*.booproj
 
+/Assets/Editor.meta
+/Assets/Editor/
+/Assets/Standard Assets.meta
+/Assets/Standard Assets/
+
 /Assets/CGIncludes/
 /Assets/CGIncludes.meta
