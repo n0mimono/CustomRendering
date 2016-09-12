@@ -10,7 +10,7 @@ public class FrameRecorder : MonoBehaviour {
 
   private int   width  = 640;
   private int   height = 480;
-  private float wait   = 1f;
+  private float wait   = 0.5f;
 
   private RenderTexture rt;
   private Texture2D     tex;
@@ -27,14 +27,14 @@ public class FrameRecorder : MonoBehaviour {
     yield return new WaitForSeconds (wait);
 
     Debug.Log ("Start Record");
-    while (true) {
+    for (int t = 0;; t++) {
       yield return new WaitForEndOfFrame ();
 
-      Capture ();
+      Capture (t);
     }
   }
 
-  private void Capture() {
+  private void Capture(int count) {
     RenderTexture target = cam.targetTexture;
 
     cam.targetTexture = rt;
@@ -48,7 +48,7 @@ public class FrameRecorder : MonoBehaviour {
 
     byte[] bytes = tex.EncodeToPNG();
 
-    string fileName = string.Format("{0}{1:D04}.png", Prefix, Time.frameCount);
+    string fileName = string.Format("{0}{1:D04}.png", Prefix, count);
     var path = System.IO.Path.Combine(SaveDir, fileName);
 
     System.IO.File.WriteAllBytes(path, bytes);
