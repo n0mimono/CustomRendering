@@ -6,6 +6,8 @@ Rendering practice
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_0.jpg" width="960">
 
+https://youtu.be/f-CiUHW2TS8
+
 ## Painting
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_1.jpg" width="960">
