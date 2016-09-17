@@ -3,6 +3,7 @@
     _MainTex ("Texture", 2D) = "white" {}
     _Power ("Power", Float) = 1
     _Amplitude ("Amplitude", Float) = 1
+    _Damp ("Damp", Float) = 1
   }
   SubShader {
     Cull Off ZWrite Off ZTest Always
@@ -25,6 +26,7 @@
 
       float _Power;
       float _Amplitude;
+      float _Damp;
 
       float3 calcView(float2 uv, float d) {
         float2 spos = uv * 2 - 1;
@@ -53,13 +55,10 @@
 
         // rim
         float NNdotV = 1 - max(0,dot(normalDir,viewDir));
-        if (depth01 > 0.999) NNdotV = 0;
+        if (depth01 > 0.999) return col;
 
         float rim = pow(NNdotV, _Power) * _Amplitude;
-        //return normal;
-        //return float4(1,1,1,1) * rim;
-
-        return col + rim;
+        return _Damp * col + _Amplitude * rim;
       }
       ENDCG
     }
