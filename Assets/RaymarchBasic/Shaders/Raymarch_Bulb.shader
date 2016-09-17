@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Box" {
+﻿Shader "Raymarch/Bulb" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
     _Bailout ("Bailout", Float) = 1
