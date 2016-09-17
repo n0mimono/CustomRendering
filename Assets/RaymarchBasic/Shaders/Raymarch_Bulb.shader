@@ -3,6 +3,7 @@
     _Size ("Size", Vector) = (1,1,1,1)
     _Bailout ("Bailout", Float) = 1
     _Power ("Power", Float) = 1
+    _Freq ("Frequency", Float) = 1.73
 
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -24,6 +25,7 @@
       float4 _Size;
       float _Bailout;
       float _Power;
+      float _Freq;
 
       #define USE_CLIP_THRESHOLD 0
       #define FRAC_ITERATION 5
@@ -32,7 +34,7 @@
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float s = sin(_Time.x * 1.73) * 0.5 + 0.5;
+        float s = sin(_Time.x * _Freq) * 0.5 + 0.5;
         float power = (_Power - 2) * s + 2;
         return sdFractalMandelbulb(p, _Bailout, power);
       }
