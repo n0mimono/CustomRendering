@@ -8,8 +8,8 @@ public class FrameRecorder : MonoBehaviour {
   private const string SaveDir = "ScreenShots";
   private const string Prefix  = "frame_";
 
-  private int   width  = 640;
-  private int   height = 480;
+  private int   width  = 1920;
+  private int   height = 1080;
   private float wait   = 0.5f;
 
   private RenderTexture rt;
@@ -46,9 +46,9 @@ public class FrameRecorder : MonoBehaviour {
     cam.targetTexture = target;
     RenderTexture.active = null;
 
-    byte[] bytes = tex.EncodeToPNG();
+    byte[] bytes = tex.EncodeToJPG();
 
-    string fileName = string.Format("{0}{1:D04}.png", Prefix, count);
+    string fileName = string.Format("{0}{1:D04}.jpg", Prefix, count);
     var path = System.IO.Path.Combine(SaveDir, fileName);
 
     System.IO.File.WriteAllBytes(path, bytes);
