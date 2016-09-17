@@ -12,6 +12,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+#define M_PI 3.1415926
 
 float mod(float x, float y) {
   return x - y * floor(x/y);
@@ -220,8 +221,7 @@ float2 uvFuncSphere(float3 p) {
   float u = acos(q.z);
   float v = acos(q.x);
 
-  float pi = 3.1415926;
-  return float2(u, v) / pi;
+  return float2(u, v) / M_PI;
 }
 
 float2 uvFuncBox(float3 p) {
@@ -259,6 +259,18 @@ float3 trRepeat2n(float3 p, float m, float d) {
 // ref: http://blog.hvidtfeldts.net
 ////////////////////////////////
 
+
+float3 fBoxFold(float3 p, float l) {
+  return p = clamp(p, -l, l) * 2 - p;
+}
+
+float3 fSphereFold(float3 p, float l2, float m2) {
+  float r2 = dot(p,p);
+  if (r2 < m2) return p * (l2/m2);
+  else if (r2 < l2) return p * (l2/r2);
+  return p;
+}
+
 #ifndef FRAC_ITERATION
 #define FRAC_ITERATION 5
 #endif
@@ -283,6 +295,19 @@ float sdFractalMandelbulb(float3 p, float bailout, float power) {
     z += p;
   }
   return 0.5*log(r)*r/dr;
+}
+
+float sdFractalMandelbox(float3 p, float4 t) {
+  float3 z = p;
+  float dr = 1;
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    z = fBoxFold(z, t.x);
+    z = fSphereFold(z, t.y, t.z);
+    dr = fSphereFold(float3(dr,0,0), t.y, t.z).x;
+    z = t.w * z + p;
+    dr = abs(t.w) * dr + 1;
+  }
+  return length(z)/abs(dr);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

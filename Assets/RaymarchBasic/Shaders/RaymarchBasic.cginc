@@ -16,6 +16,10 @@
 #define RAY_ITERATION 64
 #endif
 
+#ifndef USE_CLIP_THRESHOLD
+#define USE_CLIP_THRESHOLD 1
+#endif
+
 #ifndef CLIP_THRESHOLD
 #define CLIP_THRESHOLD 0.01
 #endif
@@ -99,6 +103,11 @@ float3 toLocal(float3 p) {
   return q * scaler() + _LocalOffset.xyz;
 }
 
+float3 toWorld(float3 p) {
+  float3 q = (p - _LocalOffset.xyz) * unscaler();
+  return  mul(unity_ObjectToWorld, float4(p,1)).xyz;
+}
+
 float3 toWorldNormal(float3 n) {
   float3 u = n * unscaler();
   float3 v = mul(unity_ObjectToWorld, float4(u,0)).xyz;
@@ -141,11 +150,12 @@ v2f_raymarch vert_raymarch (appdata_full v) {
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void frag_raymarch (v2f_raymarch i,
-  out float4 outAlbedo   : SV_Target0,
-  out float4 outSpecular : SV_Target1,
-  out float4 outNormal   : SV_Target2,
-  out float4 outEmission : SV_Target3
+void frag_raymarch_base (v2f_raymarch i, 
+  out float4 outAlbedo,
+  out float4 outSpecular,
+  out float4 outNormal,
+  out float4 outEmission,
+  out float  outDepth
 ) {
   float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
   float3 localPos       = toLocal(i.worldPos.xyz);
@@ -159,7 +169,9 @@ void frag_raymarch (v2f_raymarch i,
     dist = DIST_FUNC(rayPos);
     rayPos += ray * dist * _RayDamp;
   }
-  clip(CLIP_THRESHOLD - dist);
+  #if USE_CLIP_THRESHOLD
+    clip(CLIP_THRESHOLD - dist);
+  #endif
   if (isnan(dist)) discard;
 
   float d = dist;
@@ -182,6 +194,29 @@ void frag_raymarch (v2f_raymarch i,
   outSpecular = _SpecularGloss;
   outNormal   = float4(worldBump * 0.5 + 0.5,1);
   outEmission = _Emission;
+
+  float z = length(toWorld(rayPos) - _WorldSpaceCameraPos.xyz);
+  outDepth = (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);;
+}
+
+void frag_raymarch (v2f_raymarch i,
+  out float4 outAlbedo   : SV_Target0,
+  out float4 outSpecular : SV_Target1,
+  out float4 outNormal   : SV_Target2,
+  out float4 outEmission : SV_Target3
+) {
+  float depth;
+  frag_raymarch_base(i, outAlbedo, outSpecular, outNormal, outEmission, depth);
+}
+
+void frag_raymarch_with_depth (v2f_raymarch i,
+  out float4 outAlbedo   : SV_Target0,
+  out float4 outSpecular : SV_Target1,
+  out float4 outNormal   : SV_Target2,
+  out float4 outEmission : SV_Target3,
+  out float  outDepth    : SV_Depth
+) {
+  frag_raymarch_base(i, outAlbedo, outSpecular, outNormal, outEmission, outDepth);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

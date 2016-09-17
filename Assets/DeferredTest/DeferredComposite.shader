@@ -2,6 +2,7 @@
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     [Enum(Main,0,Depth,1,Albedo,2,Specular,3,Normal,4,Emission,5)] _Target ("Target", Float) = 1
+    _DepthScale ("Depth Eye Scale", Float) = 0.05
   }
   SubShader {
     Cull Off ZWrite Off ZTest Always
@@ -15,7 +16,9 @@
 
       float _Target;
 
-      sampler2D _CameraDepthTexture;
+      sampler2D_float _CameraDepthTexture;
+      float _DepthScale;
+
       sampler2D _CameraGBufferTexture0;
       sampler2D _CameraGBufferTexture1;
       sampler2D _CameraGBufferTexture2;
@@ -25,7 +28,9 @@
 
       fixed4 frag (v2f_img i) : SV_Target {
 
-        float  depth    = Linear01Depth(tex2D(_CameraDepthTexture, i.uv.xy).r);
+        float  d        = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv.xy);
+        float  depth    = LinearEyeDepth(d) * _DepthScale;
+
         float4 albedo   = tex2D(_CameraGBufferTexture0, i.uv.xy);
         float4 specular = tex2D(_CameraGBufferTexture1, i.uv.xy);
         float4 normal   = tex2D(_CameraGBufferTexture2, i.uv.xy);

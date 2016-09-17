@@ -1,8 +1,6 @@
-﻿Shader "Raymarch/Box" {
+﻿Shader "Raymarch/Box02" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
-    _Bailout ("Bailout", Float) = 1
-    _Power ("Power", Float) = 1
 
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -22,19 +20,16 @@
 
     CGINCLUDE
       float4 _Size;
-      float _Bailout;
-      float _Power;
 
       #define USE_CLIP_THRESHOLD 0
-      #define FRAC_ITERATION 5
+      #define RAY_ITERATION 32 // 64 // 128
       #include "RaymarchModules.cginc"
 
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
-
-        float s = sin(_Time.x * 1.73) * 0.5 + 0.5;
-        float power = (_Power - 2) * s + 2;
-        return sdFractalMandelbulb(p, _Bailout, power);
+        p = trRotate(p, M_PI / 4, float3(0,1,0));
+        float d1 = sdBox(p + float3(0,10,0), float3(1,10,1));
+        return d1;
       }
 
       float2 uvFunc(float3 p) {
@@ -43,7 +38,7 @@
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
-      #define USE_UNSCALE 0
+      //#define USE_UNSCALE 0
       #include "RaymarchBasic.cginc"
     ENDCG
 
@@ -51,7 +46,7 @@
       Tags { "LightMode" = "Deferred" }
 			CGPROGRAM
 			#pragma vertex vert_raymarch
-			#pragma fragment frag_raymarch
+			#pragma fragment frag_raymarch_with_depth
      	ENDCG
 		}
 	}
