@@ -4,7 +4,7 @@ Rendering practice
 
 ## Raymarch
 
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0911_0.jpg" width="640">
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0918_1.jpg" width="640">
 
 https://youtu.be/f-CiUHW2TS8
 
