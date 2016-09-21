@@ -4,7 +4,7 @@
     _Alpha ("Alpha", Range(0, 1)) = 1
   }
   SubShader {
-    Tags { "RenderType"="Transparent" "Queue"="Overlay" }
+    Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 
     CGINCLUDE
       #include "UnityCG.cginc"
