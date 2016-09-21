@@ -41,16 +41,16 @@
       }
     ENDCG
 
-    //Pass {
-    //  ColorMask 0
-    //  Zwrite On
-    //
-    //  CGPROGRAM
-    //  #pragma vertex vert
-    //  #pragma fragment frag
-    //  #pragma multi_compile_fog
-    //  ENDCG
-    //}
+    Pass {
+      ColorMask 0
+      Zwrite On
+
+      CGPROGRAM
+      #pragma vertex vert
+      #pragma fragment frag
+      #pragma multi_compile_fog
+      ENDCG
+    }
 
     Pass {
       Blend SrcAlpha OneMinusSrcAlpha
