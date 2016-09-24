@@ -1,4 +1,4 @@
-﻿Shader "Hiden/ScreenSpaceRim" {
+﻿Shader "Effects/ScreenSpaceRim" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     _Power ("Power", Float) = 1

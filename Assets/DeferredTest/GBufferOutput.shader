@@ -1,4 +1,4 @@
-﻿Shader "Test/DeferredComposite" {
+﻿Shader "Test/GBufferOutput" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     [Enum(Main,0,Depth,1,Albedo,2,Specular,3,Normal,4,Emission,5)] _Target ("Target", Float) = 1
