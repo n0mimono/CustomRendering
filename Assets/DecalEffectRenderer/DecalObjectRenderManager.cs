@@ -5,26 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public class PaintRenderManager : MonoBehaviour {
-
+public class DecalObjectRenderManager : MonoBehaviour {
+  
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer>();
   private static readonly CameraEvent TargetCameraEvent = CameraEvent.BeforeLighting;
 
-  private HashSet<Painter> paints = new HashSet<Painter>();
+  protected HashSet<DecalObject> objects = new HashSet<DecalObject>();
 
-  public static PaintRenderManager Instance { private set; get; } 
-
-  void Awake() {
-    Instance = this;
+  public void Add(DecalObject obj) {
+    Remove (obj);
+    objects.Add (obj);
   }
 
-  public void Add(Painter p) {
-    Remove (p);
-    paints.Add (p);
-  }
-
-  public void Remove(Painter p) {
-    paints.Remove (p);
+  public void Remove(DecalObject obj) {
+    objects.Remove (obj);
   }
 
   private void CleanUp() {
@@ -58,7 +52,7 @@ public class PaintRenderManager : MonoBehaviour {
       buf.Clear();
     } else {
       buf = new CommandBuffer();
-      buf.name = "Painter";
+      buf.name = GetType ().Name;
       buffers[current] = buf;
       current.AddCommandBuffer(TargetCameraEvent, buf);
     }
@@ -66,10 +60,8 @@ public class PaintRenderManager : MonoBehaviour {
 
   }
 
-  public void Reconstruct(CommandBuffer buf) {
-    var normalsID = Shader.PropertyToID("_NormalsCopy");
-    buf.GetTemporaryRT(normalsID, -1, -1);
-    buf.Blit(BuiltinRenderTextureType.GBuffer2, normalsID);
+  public virtual void Reconstruct(CommandBuffer buf) {
+
     RenderTargetIdentifier[] mrt = {
       BuiltinRenderTextureType.GBuffer0, // albedo
       BuiltinRenderTextureType.GBuffer1, // specular
@@ -77,11 +69,11 @@ public class PaintRenderManager : MonoBehaviour {
       BuiltinRenderTextureType.GBuffer3  // emission
     };
     buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
-    foreach (var paint in paints.Where(p => p.IsActive)) {
-      buf.DrawMesh(paint);
+
+    foreach (var obj in objects.Where(o => o.IsActive)) {
+      buf.DrawMesh(obj);
     }
 
-    buf.ReleaseTemporaryRT (normalsID);
   }
 
 }
