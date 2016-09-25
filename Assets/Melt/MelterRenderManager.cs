@@ -15,8 +15,8 @@ public class MelterRenderManager : DecalObjectRenderManager {
       BuiltinRenderTextureType.GBuffer2, // normal
       BuiltinRenderTextureType.GBuffer3  // emission
     };
-    buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
 
+    buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
     foreach (var obj in objects.Where(o => o.IsActive)) {
       buf.DrawMesh(obj);
     }

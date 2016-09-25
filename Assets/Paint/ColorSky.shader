@@ -1,4 +1,4 @@
-Shader "Painter/Skybox" {
+Shader "Paint/Skybox" {
   Properties {
     _FrontColor ("Front (+Z)", Color) = (1,1,1,1)
     _BackColor ("Back (-Z)", Color) = (1,1,1,1)
