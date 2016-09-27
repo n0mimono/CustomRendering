@@ -33,6 +33,7 @@
       ZWrite Off
       Offset -1,0
       Blend SrcAlpha OneMinusSrcAlpha
+      Cull Off
 
       Stencil {
         Ref 1
