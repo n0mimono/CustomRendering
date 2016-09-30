@@ -7,15 +7,11 @@ using System.Linq;
 public class ForwardTransparentRenderManager : MonoBehaviour {
   public GameObject[] objects;
 
-  private Material matZWrite;
-
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer> ();
   private Dictionary<SkinnedMeshRenderer, Material[]> matMap = new Dictionary<SkinnedMeshRenderer, Material[]> ();
 
   void Start() {
-    Shader shader = Shader.Find ("Forward/ForwardTransparentZWrite");
-    matZWrite = new Material (shader);
-
+    
     foreach (GameObject go in objects) {
       SkinnedMeshRenderer[] renderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
       foreach (SkinnedMeshRenderer rend in renderers) {
@@ -61,13 +57,16 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
       
       SkinnedMeshRenderer[] renderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
       foreach (SkinnedMeshRenderer rend in renderers) {
-        buffer.DrawRenderer (rend, matZWrite);
+        Material[] mats = matMap[rend];
+        for (int i = 0; i < mats.Length; i++) {
+          buffer.DrawRenderer (rend, mats [i], i, 0);
+        }
       }
 
       foreach (SkinnedMeshRenderer rend in renderers) {
         Material[] mats = matMap[rend];
         for (int i = 0; i < mats.Length; i++) {
-          buffer.DrawRenderer (rend, mats [i], i);
+          buffer.DrawRenderer (rend, mats [i], i, 1);
         }
       }
     }
