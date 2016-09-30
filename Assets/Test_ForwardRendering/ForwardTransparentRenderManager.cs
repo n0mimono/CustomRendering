@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class ForwardTransparentRenderManager : MonoBehaviour {
+  public int materialPassCount;
   public GameObject[] objects;
 
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer> ();
@@ -56,19 +57,15 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
     ) {
       
       SkinnedMeshRenderer[] renderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
-      foreach (SkinnedMeshRenderer rend in renderers) {
-        Material[] mats = matMap[rend];
-        for (int i = 0; i < mats.Length; i++) {
-          buffer.DrawRenderer (rend, mats [i], i, 0);
+      for (int k = 0; k < materialPassCount; k++) {
+        foreach (SkinnedMeshRenderer rend in renderers) {
+          Material[] mats = matMap[rend];
+          for (int i = 0; i < mats.Length; i++) {
+            buffer.DrawRenderer (rend, mats [i], i, k);
+          }
         }
       }
 
-      foreach (SkinnedMeshRenderer rend in renderers) {
-        Material[] mats = matMap[rend];
-        for (int i = 0; i < mats.Length; i++) {
-          buffer.DrawRenderer (rend, mats [i], i, 1);
-        }
-      }
     }
 
   }

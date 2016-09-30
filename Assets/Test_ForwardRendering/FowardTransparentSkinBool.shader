@@ -6,6 +6,9 @@
     _RimPower ("Rim Power", Float) = 1
     _RimAmplitude ("Rim Amplitude", Float) = 1
     _RimTint ("Rim Tint", Color) = (1,1,1,1)
+
+    _CutHeight ("Cut Height", Float) = 0.5
+    _CutColor ("Cut Color", Color) = (1,1,1,1)
   }
   SubShader {
     Tags { "RenderType"="Transparent" "Queue"="Transparent" }
@@ -35,6 +38,9 @@
       float _RimAmplitude;
       float4 _RimTint;
 
+      float _CutHeight;
+      float4 _CutColor;
+
       v2f vert (appdata v) {
         v2f o;
         o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
@@ -46,6 +52,7 @@
       }
       
       fixed4 frag (v2f i) : SV_Target {
+        if (i.worldPos.y > _CutHeight) discard;
         fixed4 col = tex2D(_MainTex, i.uv);
 
         float3 normalDir = normalize(i.normal);
@@ -60,19 +67,52 @@
 
         return col;
       }
+
+      fixed4 frag_cut (v2f i) : SV_Target {
+        if (i.worldPos.y > _CutHeight) discard;
+        return float4(_CutColor.rgb, _Alpha);
+      }
+
     ENDCG
 
+    // 0: front depth
     Pass {
       ColorMask 0
       Zwrite On
 
+      Stencil {
+        Ref 1
+        Comp Always
+        Pass Replace
+      }
+
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag
-      #pragma multi_compile_fog
       ENDCG
     }
 
+    // 1: cut
+    Pass {
+      Cull Front
+      Blend SrcAlpha OneMinusSrcAlpha
+      ZTest Less
+      Zwrite On
+      Offset 1,0
+
+      Stencil {
+        Ref 2
+        Comp Greater
+        Pass Replace
+      }
+
+      CGPROGRAM
+      #pragma vertex vert
+      #pragma fragment frag_cut
+      ENDCG
+    }
+
+    // 2: color
     Pass {
       Blend SrcAlpha OneMinusSrcAlpha
       ZTest LEqual
@@ -84,6 +124,7 @@
       #pragma multi_compile_fog
       ENDCG
     }
+
 
   }
 }
