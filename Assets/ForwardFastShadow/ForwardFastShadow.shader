@@ -46,7 +46,7 @@
       #pragma fragment frag
       
       fixed4 frag (v2f i) : SV_Target {
-        return half4(0,0,0,0.5);
+        return half4(1,0,0,0.5);
       }
       ENDCG
     }
