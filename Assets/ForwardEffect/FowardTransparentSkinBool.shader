@@ -67,7 +67,7 @@
         return dot(pos, normalize(_CutAxis.xyz)) - _CutThreshold;
       }
 
-      fixed4 frag_base(v2f i, bool useCutRim) {
+      fixed4 frag_base(v2f i, bool isBaseCut) {
         fixed4 col = tex2D(_MainTex, i.uv);
 
         float3 normalDir = normalize(i.normal);
@@ -78,10 +78,15 @@
         col.rgb += rim * (1 - abs(_Alpha * 2 - 1)) * _RimTint.rgb;
         col.a = _Alpha * (1 + rim);
 
-        if (useCutRim) { 
-          float4 cutRim = float4(_CutColor.rgb, _Alpha);
+        float4 cutRim = float4(_CutColor.rgb, _Alpha);
+        if (isBaseCut) { 
           float cutVal = max(0,_CutRimAmplitude*(cutPosition(i.worldPos.xyz) + _CutRimOffset));
           col = lerp(col, cutRim, saturate(pow(cutVal, _CutRimPower)));
+        } else {
+          float cutVal = max(0,_CutRimAmplitude*(cutPosition(i.worldPos.xyz) - _CutRimOffset * 0.2));
+          float cutRate =  saturate(pow(cutVal, _CutRimPower));
+          col.rgb = lerp(cutRim.rgb, col.rgb, cutRate);
+          col.a = lerp(cutRim.a, 0, 1 - cutRate);
         }
 
         UNITY_APPLY_FOG(i.fogCoord, col);
@@ -101,7 +106,7 @@
       fixed4 frag_face_add (v2f i) : SV_Target {
         float4 col = frag_base(i, false);
         col.rgb = (col.r + col.b + col.g) / 3;
-        col.a *= 0.4;
+        col.a *= 0.5;
         return col;
       }
     ENDCG
