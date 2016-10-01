@@ -3,20 +3,30 @@ using UnityEngine.Rendering;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class ForwardTransparentRenderManager : MonoBehaviour {
-  public int materialPassCount;
-  public GameObject[] objects;
+
+  [Serializable]
+  public class Target {
+    public GameObject go;
+    public int        passCount;
+
+    [HideInInspector]
+    public Renderer[] renderers;
+    [HideInInspector]
+    public Dictionary<SkinnedMeshRenderer, Material[]> map = new Dictionary<SkinnedMeshRenderer, Material[]> ();
+  }
+  public Target[] targets;
 
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer> ();
-  private Dictionary<SkinnedMeshRenderer, Material[]> matMap = new Dictionary<SkinnedMeshRenderer, Material[]> ();
 
   void Start() {
     
-    foreach (GameObject go in objects) {
-      SkinnedMeshRenderer[] renderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
-      foreach (SkinnedMeshRenderer rend in renderers) {
-        matMap [rend] = rend.sharedMaterials;
+    foreach (Target tgt in targets) {
+      tgt.renderers = tgt.go.GetComponentsInChildren<SkinnedMeshRenderer> ();
+      foreach (SkinnedMeshRenderer rend in tgt.renderers) {
+        tgt.map [rend] = rend.sharedMaterials;
         rend.materials = new Material[0];
       }
     }
@@ -52,14 +62,13 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
       current.AddCommandBuffer(CameraEvent.AfterSkybox, buffer);
     }
 
-    foreach (GameObject go in objects.
-      OrderBy (g => -1f * Vector3.Distance (g.transform.position, current.transform.position))
+    foreach (Target tgt in targets.
+      OrderBy (t => -1f * Vector3.Distance (t.go.transform.position, current.transform.position))
     ) {
       
-      SkinnedMeshRenderer[] renderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
-      for (int k = 0; k < materialPassCount; k++) {
-        foreach (SkinnedMeshRenderer rend in renderers) {
-          Material[] mats = matMap[rend];
+      for (int k = 0; k < tgt.passCount; k++) {
+        foreach (SkinnedMeshRenderer rend in tgt.renderers) {
+          Material[] mats = tgt.map[rend];
           for (int i = 0; i < mats.Length; i++) {
             buffer.DrawRenderer (rend, mats [i], i, k);
           }
