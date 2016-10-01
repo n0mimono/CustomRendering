@@ -6,8 +6,16 @@ using System.Linq;
 using System;
 
 public class MelterRenderManager : DecalObjectRenderManager {
+  public int passCount;
 
   public override void Reconstruct(CommandBuffer buf) {
+    
+    Camera    camera = Camera.current;
+    Matrix4x4 view   = camera.worldToCameraMatrix;
+    Matrix4x4 proj   = GL.GetGPUProjectionMatrix (camera.projectionMatrix, false);
+    Matrix4x4 vp     = proj * view;
+    Matrix4x4 ivp    = vp.inverse;
+    Shader.SetGlobalMatrix ("_InvViewProj", ivp);
 
     RenderTargetIdentifier[] mrt = {
       BuiltinRenderTextureType.GBuffer0, // albedo
@@ -18,7 +26,9 @@ public class MelterRenderManager : DecalObjectRenderManager {
 
     buf.SetRenderTarget (mrt, BuiltinRenderTextureType.CameraTarget);
     foreach (var obj in objects.Where(o => o.IsActive)) {
-      buf.DrawMesh(obj);
+      for (int i = 0; i < passCount; i++) {
+        buf.DrawMesh(obj);
+      }
     }
 
   }
