@@ -1,6 +1,6 @@
 # CustomRendering
 
-Rendering practice
+Rendering practice for Unity
 
 ## Raymarch
 
