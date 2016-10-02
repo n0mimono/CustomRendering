@@ -4,13 +4,16 @@ Rendering practice
 
 ## Raymarch
 
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_0.jpg" width="640">
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0918_1.jpg" width="640">
 
 https://youtu.be/f-CiUHW2TS8
 
+https://youtu.be/nMVaRgYEk-Y
+
+
 ## Painting
 
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/misc/screenshot0911_1.jpg" width="640">
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0911_1.jpg" width="640">
 
 https://n0mimono.github.io/CustomRendering/
 
