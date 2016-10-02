@@ -11,7 +11,7 @@ https://youtu.be/f-CiUHW2TS8
 https://youtu.be/nMVaRgYEk-Y
 
 
-## Painting
+## Decal painting
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0911_1.jpg" width="640">
 
