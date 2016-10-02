@@ -17,6 +17,11 @@ https://youtu.be/nMVaRgYEk-Y
 
 https://n0mimono.github.io/CustomRendering/
 
+
+## Transparent effects on forward rendering
+
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1002_1.jpg" width="640">
+
 ---
 
 # License
