@@ -1,4 +1,4 @@
-﻿Shader "Forward/ForwardTransparentSkinBool" {
+﻿Shader "Forward/ForwardTransparentSkinGhost" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     _Alpha ("Alpha", Range(0, 1)) = 1

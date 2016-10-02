@@ -15,22 +15,20 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
     [HideInInspector]
     public Renderer[] renderers;
     [HideInInspector]
-    public Dictionary<SkinnedMeshRenderer, Material[]> map = new Dictionary<SkinnedMeshRenderer, Material[]> ();
+    public Dictionary<Renderer, Material[]> map = new Dictionary<Renderer, Material[]> ();
   }
   public Target[] targets;
 
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer> ();
 
   void Start() {
-    
     foreach (Target tgt in targets) {
-      tgt.renderers = tgt.go.GetComponentsInChildren<SkinnedMeshRenderer> ();
-      foreach (SkinnedMeshRenderer rend in tgt.renderers) {
+      tgt.renderers = tgt.go.GetComponentsInChildren<Renderer> ();
+      foreach (Renderer rend in tgt.renderers) {
         tgt.map [rend] = rend.sharedMaterials;
         rend.materials = new Material[0];
       }
     }
-
   }
 
   private void Cleanup() {
@@ -67,7 +65,7 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
     ) {
       
       for (int k = 0; k < tgt.passCount; k++) {
-        foreach (SkinnedMeshRenderer rend in tgt.renderers) {
+        foreach (Renderer rend in tgt.renderers) {
           Material[] mats = tgt.map[rend];
           for (int i = 0; i < mats.Length; i++) {
             buffer.DrawRenderer (rend, mats [i], i, k);
