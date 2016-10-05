@@ -1,7 +1,7 @@
 ﻿
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef RAYMARCH_BASIC
-#define RAYMARCH_BASIC
+#ifndef RAYMARCH_CORE
+#define RAYMARCH_CORE
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "UnityCG.cginc"
@@ -40,6 +40,9 @@
 #define NORMAL_PRECISION 0.001
 #endif
 
+#ifndef OUT_DEPTH
+#define OUT_DEPTH 1
+#endif
 
 float  _ModelClip;
 float  _RayDamp;
@@ -105,7 +108,7 @@ float3 toLocal(float3 p) {
 
 float3 toWorld(float3 p) {
   float3 q = (p - _LocalOffset.xyz) * unscaler();
-  return  mul(unity_ObjectToWorld, float4(p,1)).xyz;
+  return mul(unity_ObjectToWorld, float4(q,1)).xyz;
 }
 
 float3 toWorldNormal(float3 n) {
@@ -122,6 +125,18 @@ float3x3 normToOrth(float3 n) {
   float3 n1 = normalize(worldTangent - n2.y * n2);
   float3 n0 = cross(n2, n1);
   return float3x3(n0, n1, n2);
+}
+
+float posToDepth(float4 p) {
+  #if defined(SHADER_TARGET_GLSL) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3)
+  return (p.z / p.w + 1) * 0.5;
+  #else
+  return p.z / p.w;
+  #endif
+}
+
+float worldToDepth(float3 p) {
+  return posToDepth(mul(UNITY_MATRIX_VP, float4(p, 1)));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,13 +165,17 @@ v2f_raymarch vert_raymarch (appdata_full v) {
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void frag_raymarch_base (v2f_raymarch i, 
-  out float4 outAlbedo,
-  out float4 outSpecular,
-  out float4 outNormal,
-  out float4 outEmission,
-  out float  outDepth
-) {
+struct gbuffer_out {
+  float4 albedo   : SV_Target0;
+  float4 specular : SV_Target1;
+  float4 normal   : SV_Target2;
+  float4 emission : SV_Target3;
+  #if OUT_DEPTH
+  float  depth    : SV_Depth;
+  #endif
+};
+
+gbuffer_out frag_raymarch (v2f_raymarch i) {
   float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
   float3 localPos       = toLocal(i.worldPos.xyz);
   float3 viewDir        = normalize(localCameraPos - localPos);
@@ -170,7 +189,7 @@ void frag_raymarch_base (v2f_raymarch i,
     rayPos += ray * dist * _RayDamp;
   }
   #if USE_CLIP_THRESHOLD
-    clip(CLIP_THRESHOLD - dist);
+  clip(CLIP_THRESHOLD - dist);
   #endif
   if (isnan(dist)) discard;
 
@@ -190,35 +209,20 @@ void frag_raymarch_base (v2f_raymarch i,
   float3 localBump = UnpackNormal(tex2D(_BumpTex, TRANSFORM_TEX(uv, _BumpTex)));
   float3 worldBump = mul(localBump, normToOrth(worldNormal));
 
-  outAlbedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex));
-  outSpecular = _SpecularGloss;
-  outNormal   = float4(worldBump * 0.5 + 0.5,1);
-  outEmission = _Emission;
+  gbuffer_out g;
+  g.albedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex));
+  g.specular = _SpecularGloss;
+  g.normal   = float4(worldBump * 0.5 + 0.5,1);
+  g.emission = _Emission;
 
+  #if OUT_DEPTH
   float z = length(toWorld(rayPos) - _WorldSpaceCameraPos.xyz);
-  outDepth = (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);;
-}
+  g.depth = (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
+  #endif
 
-void frag_raymarch (v2f_raymarch i,
-  out float4 outAlbedo   : SV_Target0,
-  out float4 outSpecular : SV_Target1,
-  out float4 outNormal   : SV_Target2,
-  out float4 outEmission : SV_Target3
-) {
-  float depth;
-  frag_raymarch_base(i, outAlbedo, outSpecular, outNormal, outEmission, depth);
-}
-
-void frag_raymarch_with_depth (v2f_raymarch i,
-  out float4 outAlbedo   : SV_Target0,
-  out float4 outSpecular : SV_Target1,
-  out float4 outNormal   : SV_Target2,
-  out float4 outEmission : SV_Target3,
-  out float  outDepth    : SV_Depth
-) {
-  frag_raymarch_base(i, outAlbedo, outSpecular, outNormal, outEmission, outDepth);
+  return g;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#endif // RAYMARCH_BASIC
+#endif // RAYMARCH_CORE
 //////////////////////////////////////////////////////////////////////////////////////////////

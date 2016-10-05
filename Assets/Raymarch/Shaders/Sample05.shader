@@ -54,7 +54,7 @@
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
     ENDCG
 
 		Pass {

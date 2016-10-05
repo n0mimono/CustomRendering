@@ -30,7 +30,7 @@
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_UNSCALE 0
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
     ENDCG
 
 		Pass {

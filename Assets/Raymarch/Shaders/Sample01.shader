@@ -20,7 +20,7 @@
       Tags { "LightMode" = "Deferred" }
 			CGPROGRAM
       #include "RaymarchModules.cginc"
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
 			#pragma vertex vert_raymarch
 			#pragma fragment frag_raymarch
      	ENDCG

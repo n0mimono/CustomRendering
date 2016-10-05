@@ -54,14 +54,14 @@
       #define UV_FUNC uvFunc
       #define RAY_ITERATION 128
       #define NORMAL_PRECISION 0.05
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
     ENDCG
 
 		Pass {
       Tags { "LightMode" = "Deferred" }
 			CGPROGRAM
 			#pragma vertex vert_raymarch
-			#pragma fragment frag_raymarch
+      #pragma fragment frag_raymarch
      	ENDCG
 		}
 	}
