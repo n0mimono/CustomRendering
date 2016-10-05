@@ -128,6 +128,7 @@ float3x3 normToOrth(float3 n) {
 }
 
 float posToDepth(float4 p) {
+
   #if defined(SHADER_TARGET_GLSL) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3)
   return (p.z / p.w + 1) * 0.5;
   #else
@@ -136,7 +137,8 @@ float posToDepth(float4 p) {
 }
 
 float worldToDepth(float3 p) {
-  return posToDepth(mul(UNITY_MATRIX_VP, float4(p, 1)));
+  float z = length(p - _WorldSpaceCameraPos.xyz);
+  return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +153,7 @@ struct v2f_raymarch {
   float4 worldPos : TEXCOORD1;
 };
 
-v2f_raymarch vert_raymarch (appdata_full v) {
+v2f_raymarch vert_raymarch (appdata_base v) {
   v2f_raymarch o;
   o.pos      = mul(UNITY_MATRIX_MVP, v.vertex);
   o.vertex   = v.vertex;
@@ -175,9 +177,9 @@ struct gbuffer_out {
   #endif
 };
 
-gbuffer_out frag_raymarch (v2f_raymarch i) {
+void raymarch(float3 worldPos, out float3 localRayPos, out float localDist) {
   float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
-  float3 localPos       = toLocal(i.worldPos.xyz);
+  float3 localPos       = toLocal(worldPos);
   float3 viewDir        = normalize(localCameraPos - localPos);
 
   float3 ray    = -viewDir;
@@ -188,6 +190,16 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
     dist = DIST_FUNC(rayPos);
     rayPos += ray * dist * _RayDamp;
   }
+
+  localRayPos = rayPos;
+  localDist = dist;
+}
+
+gbuffer_out frag_raymarch (v2f_raymarch i) {
+  float3 rayPos;
+  float dist;
+  raymarch(i.worldPos, rayPos, dist);
+
   #if USE_CLIP_THRESHOLD
   clip(CLIP_THRESHOLD - dist);
   #endif
@@ -205,7 +217,6 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   float3 worldNormal = toWorldNormal(localNormal);
 
   float2 uv = UV_FUNC(rayPos);
-
   float3 localBump = UnpackNormal(tex2D(_BumpTex, TRANSFORM_TEX(uv, _BumpTex)));
   float3 worldBump = mul(localBump, normToOrth(worldNormal));
 
@@ -216,11 +227,58 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   g.emission = _Emission;
 
   #if OUT_DEPTH
-  float z = length(toWorld(rayPos) - _WorldSpaceCameraPos.xyz);
-  g.depth = (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
+  g.depth = worldToDepth(toWorld(rayPos));
   #endif
 
   return g;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// Shadow caster
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+// todo: point light support
+struct v2f_raymarch_caster {
+  V2F_SHADOW_CASTER;
+  float4 vertex   : TEXCOORD0;
+  float4 worldPos : TEXCOORD1;
+};
+
+v2f_raymarch_caster vert_raymarch_caster(appdata_base v) {
+  v2f_raymarch o;
+  TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+  o.vertex   = v.vertex;
+  o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+  return o;
+}
+
+float4 frag_raymarch_caster_raw(v2f_raymarch_caster i) : SV_Target {
+  SHADOW_CASTER_FRAGMENT(i)
+}
+
+// todo: fix some bugs
+void frag_raymarch_caster (
+    v2f_raymarch_caster i,
+    out float4 outColor : SV_Target,
+    out float  outDepth : SV_Depth
+  ) {
+
+  // todo: refactor deprecation
+  float3 rayPos;
+  float dist;
+  raymarch(i.worldPos, rayPos, dist);
+
+  float d = dist;
+  if (_ModelClip == 1) {
+    d = sdSphere(rayPos, scaler() * 0.5);
+  } else if (_ModelClip == 2) {
+    d = sdBox(rayPos, scaler() * 0.5);
+  }
+
+  outColor = float4(0,0,0,0);
+  outDepth = worldToDepth(toWorld(rayPos));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

@@ -61,5 +61,15 @@
 			#pragma fragment frag_raymarch
      	ENDCG
 		}
+
+    //Pass {
+    //  Tags { "LightMode" = "ShadowCaster" }
+    //  CGPROGRAM
+    //  #pragma vertex vert_raymarch_caster
+    //  #pragma fragment frag_raymarch_caster
+    //  #pragma multi_compile_shadowcaster
+    //  ENDCG
+    //}
+
 	}
 }
