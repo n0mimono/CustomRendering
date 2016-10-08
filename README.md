@@ -1,6 +1,6 @@
 # CustomRendering
 
-Rendering practice
+Rendering practice for Unity
 
 ## Raymarch
 
@@ -11,11 +11,16 @@ https://youtu.be/f-CiUHW2TS8
 https://youtu.be/nMVaRgYEk-Y
 
 
-## Painting
+## Decal painting
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0911_1.jpg" width="640">
 
 https://n0mimono.github.io/CustomRendering/
+
+
+## Transparent effects on forward rendering
+
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1002_1.jpg" width="640">
 
 ---
 

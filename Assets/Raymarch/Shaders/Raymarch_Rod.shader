@@ -51,7 +51,7 @@
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define NORMAL_PRECISION 0.01
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
     ENDCG
 
 		Pass {
@@ -61,5 +61,15 @@
 			#pragma fragment frag_raymarch
      	ENDCG
 		}
+
+    //Pass {
+    //  Tags { "LightMode" = "ShadowCaster" }
+    //  CGPROGRAM
+    //  #pragma vertex vert_raymarch_caster
+    //  #pragma fragment frag_raymarch_caster
+    //  #pragma multi_compile_shadowcaster
+    //  ENDCG
+    //}
+
 	}
 }

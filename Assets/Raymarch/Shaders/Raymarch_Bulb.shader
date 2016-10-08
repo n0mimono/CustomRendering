@@ -46,14 +46,14 @@
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_UNSCALE 0
-      #include "RaymarchBasic.cginc"
+      #include "RaymarchCore.cginc"
     ENDCG
 
 		Pass {
       Tags { "LightMode" = "Deferred" }
 			CGPROGRAM
 			#pragma vertex vert_raymarch
-			#pragma fragment frag_raymarch
+      #pragma fragment frag_raymarch
      	ENDCG
 		}
 	}
