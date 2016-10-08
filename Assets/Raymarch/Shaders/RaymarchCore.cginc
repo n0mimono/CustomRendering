@@ -32,6 +32,10 @@
 #define UV_FUNC uvFuncBox
 #endif
 
+#ifndef USE_OBJECTSPACE
+#define USE_OBJECTSPACE 1
+#endif
+
 #ifndef USE_UNSCALE
 #define USE_UNSCALE 1
 #endif
@@ -42,14 +46,6 @@
 
 #ifndef OUT_DEPTH
 #define OUT_DEPTH 1
-#endif
-
-#ifndef SHADOW_CASTER_RAY_LENGTH_SCALE
-#define SHADOW_CASTER_RAY_LENGTH_SCALE 0.5
-#endif
-
-#ifndef SHADOW_CASTER_RAY_LENGTH_OFFSET
-#define SHADOW_CASTER_RAY_LENGTH_OFFSET 0.01
 #endif
 
 float  _ModelClip;
@@ -110,19 +106,31 @@ float3 scaler() {
 }
 
 float3 toLocal(float3 p) {
+#if USE_OBJECTSPACE
   float3 q = mul(unity_WorldToObject, float4(p,1)).xyz;
   return q * scaler() + _LocalOffset.xyz;
+#else
+  return p;
+#endif
 }
 
 float3 toWorld(float3 p) {
+#if USE_OBJECTSPACE
   float3 q = (p - _LocalOffset.xyz) * unscaler();
   return mul(unity_ObjectToWorld, float4(q,1)).xyz;
+#else
+  return p;
+#endif
 }
 
 float3 toWorldNormal(float3 n) {
+#if USE_OBJECTSPACE
   float3 u = n * unscaler();
   float3 v = mul(unity_ObjectToWorld, float4(u,0)).xyz;
   return normalize(v);
+#else
+  return normalize(n);
+#endif
 }
 
 float3x3 normToOrth(float3 n) {
@@ -194,6 +202,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
   float3 localPos       = toLocal(i.worldPos);
   float3 viewDir        = normalize(localCameraPos - localPos);
+
   float3 rayPos;
   float dist;
   raymarch(localPos, viewDir, rayPos, dist);
@@ -203,6 +212,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   #endif
   if (isnan(dist)) discard;
 
+  #if USE_OBJECTSPACE
   float d = dist;
   if (_ModelClip == 1) {
     d = sdSphere(rayPos, scaler() * 0.5);
@@ -210,6 +220,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
     d = sdBox(rayPos, scaler() * 0.5);
   }
   clip(CLIP_THRESHOLD - d);
+  #endif
 
   float3 localNormal = pointToNormal(rayPos);
   float3 worldNormal = toWorldNormal(localNormal);
@@ -256,7 +267,7 @@ float4 frag_raymarch_caster_raw(v2f_raymarch_caster i) : SV_Target {
   SHADOW_CASTER_FRAGMENT(i)
 }
 
-// todo: fix some bugs
+// todo: wip, fix some bugs
 void frag_raymarch_caster (
     v2f_raymarch_caster i,
     out float4 outColor : SV_Target,
@@ -270,12 +281,13 @@ void frag_raymarch_caster (
 
   clip(CLIP_THRESHOLD - dist);
   if (isnan(dist)) discard;
+  #if USE_OBJECTSPACE
   clip(CLIP_THRESHOLD - sdBox(rayPos, scaler() * 0.5));
-
-  float rayLength = length(localPos - rayPos) + SHADOW_CASTER_RAY_LENGTH_OFFSET;
+  #endif
 
   outColor = float4(0,0,0,0);
-  outDepth = i.pos.z + rayLength * unscaler() * SHADOW_CASTER_RAY_LENGTH_SCALE;
+  float4 vp = mul(UNITY_MATRIX_VP, float4(toWorld(rayPos), 1));
+  outDepth = (vp.z / vp.w + 1) * 0.5;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
