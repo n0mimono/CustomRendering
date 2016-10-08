@@ -24,6 +24,11 @@
 #define CLIP_THRESHOLD 0.01
 #endif
 
+#ifndef CHECK_CONV_BY_CLIP_THRESHOLD
+#define CHECK_CONV_BY_CLIP_THRESHOLD 0
+#endif
+
+
 #ifndef DIST_FUNC
 #define DIST_FUNC distFuncTrial
 #endif
@@ -82,11 +87,12 @@ float4    _Emission;
 
 float3 pointToNormal(float3 p){
   float d = NORMAL_PRECISION;
-  return normalize(float3(
+  float3 n = float3(
     DIST_FUNC(p + float3(  d, 0.0, 0.0)) - DIST_FUNC(p + float3( -d, 0.0, 0.0)),
     DIST_FUNC(p + float3(0.0,   d, 0.0)) - DIST_FUNC(p + float3(0.0,  -d, 0.0)),
     DIST_FUNC(p + float3(0.0, 0.0,   d)) - DIST_FUNC(p + float3(0.0, 0.0,  -d))
-  ));
+  );
+  return normalize(n);
 }
 
 float3 unscaler() {
@@ -192,6 +198,9 @@ void raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float
   for (int i = 0; i < RAY_ITERATION; i++) {
     dist = DIST_FUNC(rayPos);
     rayPos += ray * dist * _RayDamp;
+    #if CHECK_CONV_BY_CLIP_THRESHOLD
+    if (dist <= 0) break;
+    #endif
   }
 
   localRayPos = rayPos;
