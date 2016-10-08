@@ -268,7 +268,7 @@ float3 trRepeat2n(float3 p, float m, float d) {
 
 
 float3 fBoxFold(float3 p, float l) {
-  return p = clamp(p, -l, l) * 2 - p;
+  return clamp(p, -l, l) * 2 - p;
 }
 
 float3 fSphereFold(float3 p, float l2, float m2) {
@@ -315,6 +315,17 @@ float sdFractalMandelbox(float3 p, float4 t) {
     dr = abs(t.w) * dr + 1;
   }
   return length(z)/abs(dr);
+}
+
+float sdFractalTetrahedron(float3 p, float a, float b) {
+  float r;
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    if (p.x + p.y < 0) p.xy = -p.yx;
+    if (p.x + p.z < 0) p.xz = -p.zx;
+    if (p.y + p.z < 0) p.zy = -p.yz;
+    p = p * a + (1 - a) * b;
+  }
+  return length(p) * pow(a, -FRAC_ITERATION);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
