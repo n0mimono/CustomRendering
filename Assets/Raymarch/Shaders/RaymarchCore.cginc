@@ -44,6 +44,14 @@
 #define OUT_DEPTH 1
 #endif
 
+#ifndef SHADOW_CASTER_RAY_LENGTH_SCALE
+#define SHADOW_CASTER_RAY_LENGTH_SCALE 0.5
+#endif
+
+#ifndef SHADOW_CASTER_RAY_LENGTH_OFFSET
+#define SHADOW_CASTER_RAY_LENGTH_OFFSET 0.01
+#endif
+
 float  _ModelClip;
 float  _RayDamp;
 float4 _LocalOffset;
@@ -127,15 +135,6 @@ float3x3 normToOrth(float3 n) {
   return float3x3(n0, n1, n2);
 }
 
-float posToDepth(float4 p) {
-
-  #if defined(SHADER_TARGET_GLSL) || defined(SHADER_API_GLES) || defined(SHADER_API_GLES3)
-  return (p.z / p.w + 1) * 0.5;
-  #else
-  return p.z / p.w;
-  #endif
-}
-
 float worldToDepth(float3 p) {
   float z = length(p - _WorldSpaceCameraPos.xyz);
   return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
@@ -177,11 +176,7 @@ struct gbuffer_out {
   #endif
 };
 
-void raymarch(float3 worldPos, out float3 localRayPos, out float localDist) {
-  float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
-  float3 localPos       = toLocal(worldPos);
-  float3 viewDir        = normalize(localCameraPos - localPos);
-
+void raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float localDist) {
   float3 ray    = -viewDir;
   float3 rayPos = localPos;
 
@@ -192,13 +187,16 @@ void raymarch(float3 worldPos, out float3 localRayPos, out float localDist) {
   }
 
   localRayPos = rayPos;
-  localDist = dist;
+  localDist   = dist;
 }
 
 gbuffer_out frag_raymarch (v2f_raymarch i) {
+  float3 localCameraPos = toLocal(_WorldSpaceCameraPos.xyz);
+  float3 localPos       = toLocal(i.worldPos);
+  float3 viewDir        = normalize(localCameraPos - localPos);
   float3 rayPos;
   float dist;
-  raymarch(i.worldPos, rayPos, dist);
+  raymarch(localPos, viewDir, rayPos, dist);
 
   #if USE_CLIP_THRESHOLD
   clip(CLIP_THRESHOLD - dist);
@@ -264,21 +262,20 @@ void frag_raymarch_caster (
     out float4 outColor : SV_Target,
     out float  outDepth : SV_Depth
   ) {
-
-  // todo: refactor deprecation
+  float3 localPos = toLocal(i.worldPos);
+  float3 viewDir  = -1 * normalize(UnityWorldSpaceLightDir(i.worldPos));
   float3 rayPos;
   float dist;
-  raymarch(i.worldPos, rayPos, dist);
+  raymarch(localPos, viewDir, rayPos, dist);
 
-  float d = dist;
-  if (_ModelClip == 1) {
-    d = sdSphere(rayPos, scaler() * 0.5);
-  } else if (_ModelClip == 2) {
-    d = sdBox(rayPos, scaler() * 0.5);
-  }
+  clip(CLIP_THRESHOLD - dist);
+  if (isnan(dist)) discard;
+  clip(CLIP_THRESHOLD - sdBox(rayPos, scaler() * 0.5));
+
+  float rayLength = length(localPos - rayPos) + SHADOW_CASTER_RAY_LENGTH_OFFSET;
 
   outColor = float4(0,0,0,0);
-  outDepth = worldToDepth(toWorld(rayPos));
+  outDepth = i.pos.z + rayLength * unscaler() * SHADOW_CASTER_RAY_LENGTH_SCALE;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

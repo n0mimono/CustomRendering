@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/Box02" {
+﻿Shader "Raymarch/GroundBall" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
 
@@ -22,14 +22,20 @@
       float4 _Size;
 
       #define USE_CLIP_THRESHOLD 0
-      #define RAY_ITERATION 32 // 64 // 128
+      #define RAY_ITERATION 64 // 128
       #include "RaymarchModules.cginc"
 
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
         p = trRotate(p, M_PI / 4, float3(0,1,0));
         float d1 = sdBox(p + float3(0,10,0), float3(1,10,1));
-        return d1;
+        float d2 = sdSphere(p + float3(0,3,0), 2.5);
+        p = trRotate(p, M_PI / 4, float3(0,1,0));
+        float d3 = sdBox(p + float3(0,25,0), float3(4,20,4));
+        float d4 = sdCylinder(p + float3(-1,8,2), float4(0.5,10,0,0));
+        float d5 = sdSphere(p + float3(-1.5,0,3), 1);
+
+        return opUni(opUni(opUni(opUni(d1, d2, 10), d3, 5), d4, 10), d5, 10);
       }
 
       float2 uvFunc(float3 p) {
@@ -39,6 +45,8 @@
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       //#define USE_UNSCALE 0
+      //#define SHADOW_CASTER_RAY_LENGTH_SCALE 0
+      //#define SHADOW_CASTER_RAY_LENGTH_OFFSET 0
       #include "RaymarchCore.cginc"
     ENDCG
 
@@ -49,5 +57,14 @@
 			#pragma fragment frag_raymarch
      	ENDCG
 		}
-	}
+
+    //Pass {
+    //  Tags { "LightMode" = "ShadowCaster" }
+    //  CGPROGRAM
+    //  #pragma vertex vert_raymarch_caster
+    //  #pragma fragment frag_raymarch_caster
+    //  #pragma multi_compile_shadowcaster
+    //  ENDCG
+    //}
+ 	}
 }
