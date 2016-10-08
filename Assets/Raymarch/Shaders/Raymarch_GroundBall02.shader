@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/GroundBall" {
+﻿Shader "Raymarch/GroundBall02" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
 
@@ -35,11 +35,11 @@
         float d4 = sdCylinder(p + float3(-1,8,2), float4(0.5,10,0,0));
         float d5 = sdSphere(p + float3(-1.5,0,3), 1);
 
-        return opUni(opUni(opUni(opUni(d1, d2, 10), d3, 5), d4, 10), d5, 10);
+        return opUni(opUni(opUni(opUni(d1, d2, 10), d3, 2), d4, 8), d5, 10);
       }
 
       float2 uvFunc(float3 p) {
-        return uvFuncBox(p);
+        return uvFuncQuartz(p);
       }
 
       #define DIST_FUNC distFunc

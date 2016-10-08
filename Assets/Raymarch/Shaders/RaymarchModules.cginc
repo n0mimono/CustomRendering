@@ -216,6 +216,13 @@ float2 uvFuncBasic(float3 p) {
   return float2(p.x + p.y, p.z - p.x);
 }
 
+float2 uvFuncQuartz(float3 p) {
+  float3 q = p / length(p);
+  float u = q.y * acos(q.z) / M_PI + p.x + p.y;
+  float v = q.y * acos(q.x) / M_PI + p.z - p.y;
+  return float2(u, v);
+}
+
 float2 uvFuncSphere(float3 p) {
   float3 q = p / length(p);
   float u = acos(q.z);
