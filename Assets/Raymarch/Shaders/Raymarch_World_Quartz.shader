@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/GroundBall_Object" {
+﻿Shader "Raymarch/World_Quartz" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
 
@@ -12,7 +12,6 @@
     _RayDamp ("Ray Damp", Float) = 1
     _LocalOffset ("Local Offset", Vector) = (0,0,0,0)
     _LocalTangent ("Local Tangent", Vector) = (0.15,1.24,0.89,0)
-    [Enum(Sphere,1,Box,2)] _ModelClip ("Model Clip", Float) = 1
   }
  	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -22,7 +21,7 @@
       float4 _Size;
 
       #define USE_CLIP_THRESHOLD 0
-      #define RAY_ITERATION 64 //128
+      #define RAY_ITERATION 64 // 128
       #include "RaymarchModules.cginc"
 
       float distFunc(float3 p) {
@@ -44,7 +43,7 @@
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
-      //#define USE_UNSCALE 0
+      #define USE_OBJECTSPACE 0
       #include "RaymarchCore.cginc"
     ENDCG
 
@@ -56,13 +55,5 @@
      	ENDCG
 		}
 
-    //Pass {
-    //  Tags { "LightMode" = "ShadowCaster" }
-    //  CGPROGRAM
-    //  #pragma vertex vert_raymarch_caster
-    //  #pragma fragment frag_raymarch_caster
-    //  #pragma multi_compile_shadowcaster
-    //  ENDCG
-    //}
  	}
 }

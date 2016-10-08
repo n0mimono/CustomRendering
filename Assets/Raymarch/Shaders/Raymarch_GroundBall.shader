@@ -1,4 +1,4 @@
-﻿Shader "Raymarch/GroundBall_World" {
+﻿Shader "Raymarch/GroundBall" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
 
@@ -22,7 +22,7 @@
       float4 _Size;
 
       #define USE_CLIP_THRESHOLD 0
-      #define RAY_ITERATION 64 // 128
+      #define RAY_ITERATION 64 //128
       #include "RaymarchModules.cginc"
 
       float distFunc(float3 p) {
@@ -44,7 +44,7 @@
 
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
-      #define USE_OBJECTSPACE 0
+      //#define USE_UNSCALE 0
       #include "RaymarchCore.cginc"
     ENDCG
 
@@ -56,5 +56,13 @@
      	ENDCG
 		}
 
+    //Pass {
+    //  Tags { "LightMode" = "ShadowCaster" }
+    //  CGPROGRAM
+    //  #pragma vertex vert_raymarch_caster
+    //  #pragma fragment frag_raymarch_caster
+    //  #pragma multi_compile_shadowcaster
+    //  ENDCG
+    //}
  	}
 }
