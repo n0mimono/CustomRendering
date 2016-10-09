@@ -2,19 +2,18 @@
 
 Rendering practice for Unity
 
+## Raymarch in world space
+
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1008_1.jpg" width="640">
+
+* https://github.com/n0mimono/CustomRendering/wiki
+
 ## Raymarch in object space
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0918_1.jpg" width="640">
 
 * https://youtu.be/f-CiUHW2TS8
 * https://youtu.be/nMVaRgYEk-Y
-
-## Raymarch in world space
-
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1008_1.jpg" width="640">
-
-* https://youtu.be/9NX4Tlu0Xw0
-* https://github.com/n0mimono/CustomRendering/wiki
 
 ## Decal painting
 
