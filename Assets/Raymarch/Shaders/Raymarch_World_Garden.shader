@@ -29,18 +29,6 @@
       #define FRAC_ITERATION 9
       #include "RaymarchModules.cginc"
 
-      float sdFunc_GroundBall(float3 p) {
-        p = trRotate(p, M_PI / 4, float3(0,1,0));
-
-        float d1 = sdBox(p + float3(0,10,0), float3(1,10,1));
-        float d2 = sdSphere(p + float3(0,3,0), 2.5);
-
-        float3 p3 = trRotate(p, M_PI / 4, float3(0,1,0));
-        float d3 = sdBox(p3 + float3(0,25,0), float3(3.5,20,3.5));
-
-        return opUni(opUni(d1, d2, 4), d3, 2);
-      }
-
       float sdFractalKaleidoBox(float3 p, float4 c, float4 rot, float l) {
         float a = c.w;
         float3 b = c.xyz;
@@ -67,12 +55,10 @@
       }
 
       float distFunc(float3 p) {
-        float d0 = sdFunc_GroundBall(p);
         p = trScale(p, _Size.xyz / _Size.w);
 
         float d1 = sdFractalKaleidoBox(p, _Mandel, _Rotate, _BoxFold);
         return d1;
-        //return opUni(d1, d0);
       }
 
       float2 uvFunc(float3 p) {
@@ -86,7 +72,7 @@
       #define CHECK_CONV_BY_CLIP_THRESHOLD 1
       #define USE_CLIP_THRESHOLD 1
       #define CLIP_THRESHOLD 0.5
-      #define RAY_ITERATION 64 // 128
+      #define RAY_ITERATION 128 // 64 // 128
       #include "RaymarchCore.cginc"
     ENDCG
 
