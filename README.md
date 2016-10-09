@@ -13,6 +13,7 @@ Rendering practice for Unity
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1008_1.jpg" width="640">
 
+* https://youtu.be/9NX4Tlu0Xw0
 * https://github.com/n0mimono/CustomRendering/wiki
 
 ## Decal painting
