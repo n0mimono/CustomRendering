@@ -20,31 +20,19 @@ public class RaymarchEffect_Garden : MonoBehaviour {
   }
 
   private IEnumerator ProcEffect() {
-    SetProp (-1);
-    yield return new WaitForSeconds (4f);
+    SetProp (0.8f);
+    yield return new WaitForSeconds (3f);
 
-    yield return StartCoroutine(ProcSet(1f, 2f, -1f, -0.9f));
-    yield return new WaitForSeconds (2f);
+    yield return StartCoroutine(ProcSet(1f, 3f, 0.8f, 0.7f));
+    yield return new WaitForSeconds (3f);
 
-    yield return StartCoroutine(ProcSet(1f, 2f, -0.9f, -0.8f));
-    yield return new WaitForSeconds (2f);
+    yield return StartCoroutine(ProcSet(1f, 3f, 0.7f, 0.6f));
+    yield return new WaitForSeconds (3f);
 
-    yield return StartCoroutine(ProcSet(1f, 2f, -0.8f, -0.7f));
-    yield return new WaitForSeconds (2f);
+    yield return StartCoroutine(ProcSet(1f, 3f, 0.6f, 0.5f));
+    yield return new WaitForSeconds (3f);
 
-    yield return StartCoroutine(ProcSet(1f, 2f, -0.7f, 0.8f));
-    yield return new WaitForSeconds (2f);
-
-    yield return StartCoroutine(ProcSet(1f, 2f, 0.8f, 0.7f));
-    yield return new WaitForSeconds (2f);
-
-    yield return StartCoroutine(ProcSet(1f, 2f, 0.7f, 0.6f));
-    yield return new WaitForSeconds (2f);
-
-    yield return StartCoroutine(ProcSet(1f, 2f, 0.6f, 0.5f));
-    yield return new WaitForSeconds (2f);
-
-    yield return StartCoroutine(ProcSet(1f, 2f, 0.5f, 0.46f));
+    yield return StartCoroutine(ProcSet(1f, 3f, 0.5f, 0.46f));
     yield return null;
   }
 
@@ -53,8 +41,6 @@ public class RaymarchEffect_Garden : MonoBehaviour {
       SetProp (start + (end - start) * t);
       yield return null;
     }
-
-
 
   }
 
