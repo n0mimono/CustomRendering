@@ -28,9 +28,12 @@
 #define CHECK_CONV_BY_CLIP_THRESHOLD 0
 #endif
 
-
 #ifndef DIST_FUNC
 #define DIST_FUNC distFuncTrial
+#endif
+
+#ifndef DIFFUSE_FUNC
+#define DIFFUSE_FUNC diffuseFuncBase
 #endif
 
 #ifndef UV_FUNC
@@ -190,12 +193,13 @@ struct gbuffer_out {
   #endif
 };
 
-void raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float localDist) {
+float raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float localDist) {
   float3 ray    = -viewDir;
   float3 rayPos = localPos;
 
   float dist = 0;
-  for (int i = 0; i < RAY_ITERATION; i++) {
+  int i;
+  for (i = 0; i < RAY_ITERATION; i++) {
     dist = DIST_FUNC(rayPos);
     rayPos += ray * dist * _RayDamp;
     #if CHECK_CONV_BY_CLIP_THRESHOLD
@@ -205,6 +209,8 @@ void raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float
 
   localRayPos = rayPos;
   localDist   = dist;
+
+  return (float)i/(float)RAY_ITERATION;
 }
 
 gbuffer_out frag_raymarch (v2f_raymarch i) {
@@ -214,7 +220,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
 
   float3 rayPos;
   float dist;
-  raymarch(localPos, viewDir, rayPos, dist);
+  float conv = raymarch(localPos, viewDir, rayPos, dist);
 
   #if USE_CLIP_THRESHOLD
   clip(CLIP_THRESHOLD - dist);
@@ -239,7 +245,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   float3 worldBump = mul(localBump, normToOrth(worldNormal));
 
   gbuffer_out g;
-  g.albedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex));
+  g.albedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex)) * DIFFUSE_FUNC(rayPos, dist, conv);
   g.specular = _SpecularGloss;
   g.normal   = float4(worldBump * 0.5 + 0.5,1);
   g.emission = _Emission;
