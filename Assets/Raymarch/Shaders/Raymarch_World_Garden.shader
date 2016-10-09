@@ -1,8 +1,9 @@
 ﻿Shader "Raymarch/World_Garden" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
-    _Mandel ("Mandel", Vector) = (1,1,0.5,1)
-    _Rotate ("Rotate 1", Vector) = (0,1,0,0.4)
+    _Mandel ("Mandel", Vector) = (2,14.8,0,1)
+    _Rotate ("Rotate", Vector) = (0,1,0,0.46)
+    _BoxFold ("Box Fold", Float) = 2.2
 
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -23,8 +24,9 @@
       float4 _Size;
       float4 _Mandel;
       float4 _Rotate;
+      float _BoxFold;
 
-      #define FRAC_ITERATION 10
+      #define FRAC_ITERATION 9
       #include "RaymarchModules.cginc"
 
       float sdFunc_GroundBall(float3 p) {
@@ -39,32 +41,36 @@
         return opUni(opUni(d1, d2, 4), d3, 2);
       }
 
+      float sdFractalKaleidoBox(float3 p, float4 c, float4 rot, float l) {
+        float a = c.w;
+        float3 b = c.xyz;
+        float r;
 
-float sdFractalKaleido_tmp(float3 p, float4 c, float4 r1, float4 r2) {
-  float a = c.w;
-  float3 b = c.xyz;
-  float r;
-  for (int i = 0; i < FRAC_ITERATION; i++) {
-    p = trRotate(p, r1);
-    p = fTetraFoldNegative(abs(p));
+        for (int i = 0; i < 5; i++) {
+          p = fBoxFold(p, l);
+        }
 
-    p.z -= 0.5 * b.z * (a - 1) / a;
-    p.z = abs(-p.z);
-    p.z += 0.5 * b.z * (a - 1) / a;
+        for (int i = 0; i < FRAC_ITERATION; i++) {
+          p = trRotate(p, rot);
+          p = fTetraFoldNegative(abs(p));
 
-    p = trRotate(p, r2);
-    p.xy = p.xy * a + (1 - a) * b.xy;
-    p.z = a * p.z;
+          p.z -= 0.5 * b.z * (a - 1) / a;
+          p.z = abs(-p.z);
+          p.z += 0.5 * b.z * (a - 1) / a;
 
-  }
-  return (length(p)-2) * pow(a, -FRAC_ITERATION);
-}
+          p = trRotate(p, rot);
+          p.xy = p.xy * a + (1 - a) * b.xy;
+          p.z = a * p.z;
+
+        }
+        return (length(p)-2) * pow(a, -FRAC_ITERATION);
+      }
 
       float distFunc(float3 p) {
         float d0 = sdFunc_GroundBall(p);
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float d1 = sdFractalKaleido_tmp(p, _Mandel, _Rotate, _Rotate);
+        float d1 = sdFractalKaleidoBox(p, _Mandel, _Rotate, _BoxFold);
         return d1;
         //return opUni(d1, d0);
       }
