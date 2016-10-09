@@ -13,12 +13,13 @@ Rendering practice for Unity
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1008_1.jpg" width="640">
 
+* https://github.com/n0mimono/CustomRendering/wiki
+
 ## Decal painting
 
 <img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot0911_1.jpg" width="640">
 
-https://n0mimono.github.io/CustomRendering/
-
+* https://n0mimono.github.io/CustomRendering/
 
 ## Transparent effects on forward rendering
 
