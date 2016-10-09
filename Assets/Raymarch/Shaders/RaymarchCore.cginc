@@ -116,7 +116,7 @@ float3 toLocal(float3 p) {
   float3 q = mul(unity_WorldToObject, float4(p,1)).xyz;
   return q * scaler() + _LocalOffset.xyz;
 #else
-  return p;
+  return p + _LocalOffset.xyz;;
 #endif
 }
 
@@ -125,7 +125,7 @@ float3 toWorld(float3 p) {
   float3 q = (p - _LocalOffset.xyz) * unscaler();
   return mul(unity_ObjectToWorld, float4(q,1)).xyz;
 #else
-  return p;
+  return p - _LocalOffset.xyz;;
 #endif
 }
 

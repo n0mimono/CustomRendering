@@ -2,6 +2,7 @@
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
     _Mandel ("Mandel", Vector) = (1,1,0.5,1)
+    _Rotate ("Rotate 1", Vector) = (0,1,0,0.4)
 
     [Header(GBuffer)]
     _MainTex ("Albedo Map", 2D) = "white" {}
@@ -21,8 +22,9 @@
     CGINCLUDE
       float4 _Size;
       float4 _Mandel;
+      float4 _Rotate;
 
-      #define FRAC_ITERATION 8
+      #define FRAC_ITERATION 10
       #include "RaymarchModules.cginc"
 
       float sdFunc_GroundBall(float3 p) {
@@ -37,12 +39,34 @@
         return opUni(opUni(d1, d2, 4), d3, 2);
       }
 
+
+float sdFractalKaleido_tmp(float3 p, float4 c, float4 r1, float4 r2) {
+  float a = c.w;
+  float3 b = c.xyz;
+  float r;
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    p = trRotate(p, r1);
+    p = fTetraFoldNegative(abs(p));
+
+    p.z -= 0.5 * b.z * (a - 1) / a;
+    p.z = abs(-p.z);
+    p.z += 0.5 * b.z * (a - 1) / a;
+
+    p = trRotate(p, r2);
+    p.xy = p.xy * a + (1 - a) * b.xy;
+    p.z = a * p.z;
+
+  }
+  return (length(p)-2) * pow(a, -FRAC_ITERATION);
+}
+
       float distFunc(float3 p) {
         float d0 = sdFunc_GroundBall(p);
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float d1 = sdFractalTetrahedron(p, _Mandel.z, _Mandel.w);
-        return opUni(d1, d0);
+        float d1 = sdFractalKaleido_tmp(p, _Mandel, _Rotate, _Rotate);
+        return d1;
+        //return opUni(d1, d0);
       }
 
       float2 uvFunc(float3 p) {

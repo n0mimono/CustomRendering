@@ -12,7 +12,9 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define M_PI 3.1415926
+#define M_PI    3.1415926
+#define DEG2RAD 0.0174533
+#define RAD2DEG 57.2958
 
 float mod(float x, float y) {
   return x - y * floor(x/y);
@@ -84,6 +86,10 @@ float3 trRotate(float3 p, float angle, float3 axis){
     a.z * a.z * r + c
   );
   return mul(m, p);
+}
+
+float3 trRotate(float3 p, float4 r) {
+  return trRotate(p, r.w, r.xyz);
 }
 
 float3 trTwist(float3 p, float power){
@@ -262,8 +268,9 @@ float3 trRepeat2n(float3 p, float m, float d) {
 }
 
 ////////////////////////////////
-// fractal
+// fold function examples
 // ref: http://blog.hvidtfeldts.net
+// ref: http://www.fractalforums.com/ifs-iterated-function-systems/kaleidoscopic-(escape-time-ifs)/
 ////////////////////////////////
 
 
@@ -278,9 +285,39 @@ float3 fSphereFold(float3 p, float l2, float m2) {
   return p;
 }
 
+float3 fTetraFold(float3 p) {
+  if (p.x + p.y < 0) p.xy = -p.yx;
+  if (p.x + p.z < 0) p.xz = -p.zx;
+  if (p.y + p.z < 0) p.zy = -p.yz;
+  return p;
+}
+
+float3 fTetraFoldNegative(float3 p) {
+  if (p.x - p.y < 0) p.xy = p.yx;
+  if (p.x - p.z < 0) p.xz = p.zx;
+  if (p.y - p.z < 0) p.zy = p.yz;
+  return p;
+}
+
+float3 fCubicFold(float3 p) {
+  return abs(p);
+}
+
+float3 fOctaFold(float3 p) {
+  if (p.x - p.y < 0) p.xy = p.yx;
+  if (p.x + p.y < 0) p.xy = -p.yx;
+  if (p.x - p.z < 0) p.xz = p.zx;
+  if (p.x + p.z < 0) p.xz = -p.zx;
+  return p;
+}
+
 #ifndef FRAC_ITERATION
 #define FRAC_ITERATION 5
 #endif
+
+////////////////////////////////
+// fractal distance estimation examples
+////////////////////////////////
 
 float sdFractalMandelbulb(float3 p, float bailout, float power) {
   float3 z = p;
@@ -320,12 +357,30 @@ float sdFractalMandelbox(float3 p, float4 t) {
 float sdFractalTetrahedron(float3 p, float a, float b) {
   float r;
   for (int i = 0; i < FRAC_ITERATION; i++) {
-    if (p.x + p.y < 0) p.xy = -p.yx;
-    if (p.x + p.z < 0) p.xz = -p.zx;
-    if (p.y + p.z < 0) p.zy = -p.yz;
+    p = fTetraFold(p);
     p = p * a + (1 - a) * b;
   }
   return length(p) * pow(a, -FRAC_ITERATION);
+}
+
+float sdFractalKaleido(float3 p, float4 c, float4 r1, float4 r2) {
+  float a = c.w;
+  float3 b = c.xyz;
+  float r;
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    p = trRotate(p, r1);
+    p = fTetraFoldNegative(abs(p));
+
+    p.z -= 0.5 * b.z * (a - 1) / a;
+    p.z = abs(-p.z);
+    p.z += 0.5 * b.z * (a - 1) / a;
+
+    p = trRotate(p, r2);
+    p.xy = p.xy * a + (1 - a) * b.xy;
+    p.z = a * p.z;
+
+  }
+  return (length(p)-2) * pow(a, -FRAC_ITERATION);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
