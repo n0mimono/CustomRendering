@@ -76,8 +76,6 @@
 
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
-        //p = trRepeat(p, 20);
-        //if (p.z < -20) p += float3(5,5,0);
 
         float d1 = sdFractalKaleidoBox(p, _Mandel, _Rotate, _BoxFold);
         return d1;
@@ -87,11 +85,22 @@
         return uvFuncQuartz(p);
       }
 
-      float4 diffuseFunc(float3 p, float d, float i) {
-        return float4(p.y * 0.01 + 0.7, min(d * 100, 0.2) + 0.5, p.x * 0.01 + 0.3, 1);
+      float4 emmisionFunc(float4 buf, float3 p, float d, float i) {
+        return buf - float4(0.05,0,0.05,0);
       }
 
-      #define DIFFUSE_FUNC diffuseFunc
+      float4 normalFunc(float4 buf, float3 p, float d, float i) {
+        // todo: push depth information to alpha channel of normal.
+        return buf;
+      }
+
+      float4 albedoFunc(float4 buf, float3 p, float d, float i) {
+        return buf * float4(p.y * 0.01 + 0.7, min(d * 100, 0.2) + 0.5, p.x * 0.01 + 0.3, 1);
+      }
+
+      #define EMISSION_FUNC emmisionFunc
+      #define NORMAL_FUNC normalFunc
+      #define ALBEDO_FUNC albedoFunc
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_OBJECTSPACE 0

@@ -82,11 +82,11 @@
         return uvFuncQuartz(p);
       }
 
-      float4 diffuseFunc(float3 p, float d, float i) {
-        return float4(p.z * 0.1 + 0.4 + d, p.x * p.y * 0.02 + 0.7, p.y * 0.05 + p.z * 0.2 + 0.5,1);
+      float4 albedoFunc(float4 buf, float3 p, float d, float i) {
+        return buf * float4(p.z * 0.1 + 0.4 + d, p.x * p.y * 0.02 + 0.7, p.y * 0.05 + p.z * 0.2 + 0.5,1);
       }
 
-      #define DIFFUSE_FUNC diffuseFunc
+      #define ALBEDO_FUNC albedoFunc
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_OBJECTSPACE 0

@@ -255,8 +255,20 @@ float2 uvFuncBox(float3 p) {
 // coloring functions
 ////////////////////////////////
 
-float4 diffuseFuncBase(float3 p, float d, float i) {
-  return float4(1,1,1,1);
+float4 albedoFuncBase(float4 buf, float3 p, float d, float i) {
+  return buf;
+}
+
+float4 normalFuncBase(float4 buf, float3 p, float d, float i) {
+  return buf;
+}
+
+float4 specularFuncBase(float4 buf, float3 p, float d, float i) {
+  return buf;
+}
+
+float4 emissionFuncBase(float4 buf, float3 p, float d, float i) {
+  return buf;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

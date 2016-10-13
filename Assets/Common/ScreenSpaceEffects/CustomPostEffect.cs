@@ -20,6 +20,7 @@ public class CustomPostEffect : MonoBehaviour {
         Matrix4x4 vp     = proj * view;
         Matrix4x4 ivp    = vp.inverse;
 
+        mat.SetMatrix ("_ViewProj", vp);
         mat.SetMatrix ("_InvViewProj", ivp);
       }
 
