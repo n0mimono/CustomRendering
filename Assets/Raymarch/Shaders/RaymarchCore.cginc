@@ -318,5 +318,51 @@ void frag_raymarch_caster (
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// Procedual texture 
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+struct texture_out {
+  float4 albedo;
+  float4 specular;
+  float4 normal;
+  float4 emission;
+};
+
+texture_out texture_raymarch (float4 coord) {
+  float3 localCameraPos = float3(0,0,-1 * coord.w);
+  float3 localPos       = float3(coord.xy * 2 - 1, coord.z);
+  float3 viewDir        = normalize(localCameraPos - localPos);
+
+  float3 rayPos;
+  float dist;
+  float conv = raymarch(localPos, viewDir, rayPos, dist);
+
+  bool isClip = false;
+  #if USE_CLIP_THRESHOLD
+  isClip = CLIP_THRESHOLD - dist < 0 ? true : isClip;
+  #endif
+  isClip = isnan(dist) ? true : isClip;
+
+  float3 localNormal = pointToNormal(rayPos);
+
+  texture_out g;
+  if (isClip) {
+    g.albedo   = float4(0,0,0,0);
+    g.specular = float4(0,0,0,0);
+    g.normal   = float4(0.5,0.5,1,1);
+    g.emission = float4(0,0,0,0);
+  } else {
+    g.albedo   = ALBEDO_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+    g.specular = SPECULAR_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+    g.normal   = NORMAL_FUNC(float4(-1 * localNormal * 0.5 + 0.5,1), rayPos, dist, conv);
+    g.emission = EMISSION_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+  }
+
+  return g;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 #endif // RAYMARCH_CORE
 //////////////////////////////////////////////////////////////////////////////////////////////
