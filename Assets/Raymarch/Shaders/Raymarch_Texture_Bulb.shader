@@ -1,25 +1,38 @@
-﻿Shader "Raymarch/Texture_UnityChanDeffered" {
+﻿Shader "Raymarch/Texture_Bulb" {
   Properties {
     _MainTex ("Albedo Map", 2D) = "white" {}
     _BumpTex ("Normal Map", 2D) = "bump" {}
-    _Specular ("Specular", Color) = (1,1,1,1)
+    _SpecularGloss ("Specular/Gloss", Color) = (1,1,1,1)
     _Emission ("Emission", Color) = (1,1,1,1)
     _Tint ("Tint", Color) = (1,1,1,1)
     _Ambient ("Ambient", Range(0,1)) = 0
+
+    _Mandel ("Mandel", Vector) = (0.5, 10, 9, 0.5)
+
   }
   SubShader {
     Tags { "RenderType"="Opaque" }
     LOD 100
 
     CGINCLUDE
+      float4 _Mandel;
+
       #include "RaymarchModules.cginc"
       float distFunc(float3 p) {
-        p.z = 0.5;
-        //p = fBoxFold(p, 1);
-        return sdFractalMandelbulb(p, 10, 9);
+        p = trRepeat(p, _Mandel.y);
+        p.z = _Mandel.x;
+        return sdFractalMandelbulb(p, 10, _Mandel.z);
+      }
+
+      float4 normalFunc(float4 buf, float3 p, float d, float i) {
+        float3 n = buf.xyz * 2 - 1;
+        float3 m = float3(0,0,1);
+        n = normalize(lerp(m, n, _Mandel.w));
+        return float4(n * 0.5 + 0.5, 1);
       }
 
       #define DIST_FUNC distFunc
+      #define NORMAL_FUNC normalFunc
       #include "RaymarchCore.cginc"
     ENDCG
 
@@ -31,11 +44,6 @@
       #pragma target 3.0
       #include "UnityCG.cginc"
       #include "UnityStandardUtils.cginc"
-
-      //sampler2D _MainTex; float4 _MainTex_ST;
-      //sampler2D _BumpTex; float4 _BumpTex_ST;
-      //float4    _SpecularGloss;
-      //float4    _Emission;
 
       float4    _Tint;
       float     _Ambient;
@@ -72,10 +80,9 @@
 
         float3x3 tanTrans    = float3x3(i.tangent, i.bitangent, i.normal);
         float3   normalLocal1 = UnpackNormal(tex2D(_BumpTex, TRANSFORM_TEX(i.uv, _BumpTex)));
-        float3   normalLocal2 = tex.normal;
+        float3   normalLocal2 = tex.normal * 2 - 1;
         float3   normalLocal  = BlendNormals(normalLocal1, normalLocal2);
-
-        float3   normalWorld = normalize(mul(normalLocal, tanTrans));
+        float3   normalWorld  = normalize(mul(normalLocal, tanTrans));
 
         outAlbedo   = diffuse * _Tint;
         outSpecular = _SpecularGloss;
