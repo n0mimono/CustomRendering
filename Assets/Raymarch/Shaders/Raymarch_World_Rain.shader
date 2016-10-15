@@ -22,9 +22,6 @@
       float4 _Size;
       sampler2D _HeightTex;
 
-      float _PosNums;
-      float4 _PosArray[32];
-
       #include "RaymarchModules.cginc"
       #include "noiseSimplex.cginc"
 
@@ -42,13 +39,6 @@
         float d3 = sdCylinder(p - float3(-30,0,40), float4(20,200,0,0));
 
         db = opUni(opUni(opUni(db, d1, 6), d2, 2), d3, 2);
-
-        int n = (int)_PosNums;
-        for (int i = 0; i < n; i++) {
-          //float d = sdSphere(p - _PosArray[i].xyz, float3(1,1,1)*1);
-          //db = opUni(db, d, 10);
-        }
-
         return db;
       }
 
