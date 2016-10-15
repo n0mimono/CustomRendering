@@ -165,8 +165,10 @@ float3x3 normToOrth(float3 n) {
 }
 
 float worldToDepth(float3 p) {
-  float z = length(p - _WorldSpaceCameraPos.xyz);
-  return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
+  float4 vp = mul(UNITY_MATRIX_VP, float4(p, 1));
+  return vp.z / vp.w * 0.5 + 0.5;
+  //float z = length(p - _WorldSpaceCameraPos.xyz);
+  //return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
