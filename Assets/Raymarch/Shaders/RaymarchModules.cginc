@@ -92,6 +92,13 @@ float3 trRotate(float3 p, float4 r) {
   return trRotate(p, r.w, r.xyz);
 }
 
+float3 trRotate3(float3 p, float3 r) {
+  p = trRotate(p, float4(1,0,0,r.x));
+  p = trRotate(p, float4(0,1,0,r.y));
+  p = trRotate(p, float4(0,0,1,r.z));
+  return p;
+}
+
 float3 trTwist(float3 p, float power){
   float s = sin(power * p.y);
   float c = cos(power * p.y);
