@@ -66,21 +66,21 @@
         float4 col = tex2D(_MainTex, i.uv.xy);
 
         // up-effect
-        float3 hpos = wpos - float3(0,2,0) * noise(i.uv.yx);
+        float3 hpos = wpos + float3(0,10,0) * noise(i.uv.yx);
         float4 hvp  = mul(_ViewProj, float4(hpos, 1));
         float2 huv  = hvp.xy / hvp.w * 0.5 + 0.5;
         float4 hn   = tex2D(_CameraGBufferTexture2, huv);
-        float  hv   = 1.5 * saturate(hn.a + noise(i.uv.yx + 1) * 1 - 0.2);
+        float  hv   = 1.5 * saturate(hn.a + noise(i.uv.yx + 1) * 0.2 - 0.2);
         col += pow(float4(hv,hv,0.95,0),2) * hv * 0.05;
 
-        float h = wpos.y + 5 + (noise(i.uv.yx) * 2 - 1) * 0.2 + snoise(i.uv.xy * 1.2);
-        if (h > 0) return col;
+        float h = wpos.y + 5 + (noise(i.uv.yx) * 2 - 1) * 0.2 + snoise(i.uv.xy * 2);
+        if (h > -1) return col;
 
         // distorted color
         float2 bump = UnpackNormal(tex2D(_BumpTex, wpos.xz * 0.5)).xy;
         col = tex2D(_MainTex, i.uv.xy + bump * 0.05);
 
-        float val = 1.5 * saturate(normal.a + noise(i.uv.xy) * 0.5 - 0.2);
+        float val = 1.5 * saturate(normal.a + noise(i.uv.xy) * 0.2 - 0.2);
         col += pow(float4(val,val,0.95,0), 2) * val * 0.5;
         return col;
       }

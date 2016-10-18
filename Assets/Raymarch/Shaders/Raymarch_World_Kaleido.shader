@@ -33,7 +33,7 @@
         p = trRotate3(p, _Rotate.xyz);
 
         float height = _Height;
-        float d2 = p.y - height;// + snoise(p * 0.05);
+        float d2 = p.y - height + snoise(p * 0.5) * 2;
         float3 p3 = fBoxFold(fBoxFold(fBoxFold(fBoxFold(fBoxFold(p, 4), 4), 4), 4), 4);
         float d3 = sdBox(p3, float3(3,4,3));
         d3 = opUni(opSub(d3, d2), p.y - height + 3);
