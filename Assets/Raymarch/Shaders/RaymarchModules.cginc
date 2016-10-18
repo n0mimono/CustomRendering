@@ -309,7 +309,13 @@ float3 fBoxFold(float3 p, float l) {
 float3 fSphereFold(float3 p, float l2, float m2) {
   float r2 = dot(p,p);
   if (r2 < m2) return p * (l2/m2);
-  else if (r2 < l2) return p * (l2/r2);
+  else if (r2 > l2) return p * (l2/r2);
+  return p;
+}
+
+float3 fSphereFoldNegative(float3 p, float l2) {
+  float r2 = dot(p,p);
+  if (r2 > l2) return -p * (l2/r2);
   return p;
 }
 

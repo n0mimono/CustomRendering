@@ -26,44 +26,53 @@
       float4 _Rotate;
       float _BoxFold;
 
-      #define FRAC_ITERATION 6
+      #define FRAC_ITERATION 2
       #include "RaymarchModules.cginc"
 
-      float sdFractalKaleidoBox(float3 p, float4 c, float4 rot, float l) {
-        float a = c.w;
-        float3 b = c.xyz;
-        float r;
+      float sdFunc_Frac(float3 p, float4 c, float rot, float l) {
+        float3 z = p;
+        float dr = 1;
+        float r = 0;
+        float power = c.y;
 
-        for (int i = 0; i < 5; i++) {
-          //p = fBoxFold(p, l);
-        }
-
+        z = fBoxFold(z, l);
         for (int i = 0; i < FRAC_ITERATION; i++) {
-          p = trRotate(p, rot);
-          //p = fTetraFoldNegative(abs(p));
-          p = fOctaFold(abs(p));
+          z = fSphereFoldNegative(z, l);
+          //z = fTetraFold(fTetraFoldNegative(z));
+          //z = fOctaFold(z);
 
-          p.z -= 0.5 * b.z * (a - 1) / a;
-          p.z = abs(-p.z);
-          p.z += 0.5 * b.z * (a - 1) / a;
+          r = length(z);
+          if (r > c.x) break;
 
-          p = trRotate(p, rot);
-          p.xy = p.xy * a + (1 - a) * b.xy;
-          p.z = a * p.z;
+          float theta = acos(z.z/r);
+          float phi = atan2(z.y, z.x);
+          dr = pow(r, power-1)*power*dr + 1;
 
+          float zr = pow(r, power);
+          theta = theta * power;
+          phi = phi * power;
+
+          z = zr*float3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+          z += p;
         }
-        return (length(p)-2) * pow(a, -FRAC_ITERATION);
+
+        for (int i = 0; i < 8; i++) {
+          z = fBoxFold(z, l);
+        }
+        r = length(z);
+
+        return 0.5*log(r)*r/dr;
       }
 
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float d1 = sdFractalKaleidoBox(p, _Mandel, _Rotate, _BoxFold);
+        float d1 = sdFunc_Frac(p, _Mandel, _Rotate, _BoxFold);
         return d1;
       }
 
       float2 uvFunc(float3 p) {
-        return uvFuncQuartz(p);
+        return uvFuncBox(p);
       }
 
       #define DIST_FUNC distFunc
