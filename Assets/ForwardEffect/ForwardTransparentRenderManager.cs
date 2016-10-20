@@ -22,11 +22,17 @@ public class ForwardTransparentRenderManager : MonoBehaviour {
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer> ();
 
   void Start() {
+    Material shadowOnly = new Material (Shader.Find ("Forward/ShadowOnly"));
+
     foreach (Target tgt in targets) {
       tgt.renderers = tgt.go.GetComponentsInChildren<Renderer> ();
       foreach (Renderer rend in tgt.renderers) {
         tgt.map [rend] = rend.sharedMaterials;
-        rend.materials = new Material[0];
+
+        Material[] reps = new Material[rend.sharedMaterials.Length];
+        for (int i = 0; i < reps.Length; i++) reps[i] = shadowOnly;
+
+        rend.materials = reps;
       }
     }
   }
