@@ -23,7 +23,7 @@ Rendering practice for Unity
 
 ## Transparent effects on forward rendering
 
-<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1002_1.jpg" width="640">
+<img src="https://github.com/n0mimono/CustomRendering/raw/master-ss/screenshots/screenshot1021_1.jpg" width="640">
 
 ---
 
