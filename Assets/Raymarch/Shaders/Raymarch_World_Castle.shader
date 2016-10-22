@@ -2,7 +2,6 @@
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
     _Mandel ("Mandel", Vector) = (2,14.8,0,1)
-    _Rotate ("Rotate", Vector) = (0,1,0,0.46)
     _BoxFold ("Box Fold", Float) = 2.2
 
     [Header(GBuffer)]
@@ -23,23 +22,21 @@
     CGINCLUDE
       float4 _Size;
       float4 _Mandel;
-      float4 _Rotate;
       float _BoxFold;
 
       #define FRAC_ITERATION 2
       #include "RaymarchModules.cginc"
 
-      float sdFunc_Frac(float3 p, float4 c, float rot, float l) {
+      float sdFunc_Frac(float3 p, float4 c, float l) {
         float3 z = p;
         float dr = 1;
         float r = 0;
         float power = c.y;
 
-        z = fBoxFold(z, l);
+        z = fBoxFold(z, l * c.z);
         for (int i = 0; i < FRAC_ITERATION; i++) {
           z = fSphereFoldNegative(z, l);
           //z = fTetraFold(fTetraFoldNegative(z));
-          //z = fOctaFold(z);
 
           r = length(z);
           if (r > c.x) break;
@@ -57,7 +54,7 @@
         }
 
         for (int i = 0; i < 8; i++) {
-          z = fBoxFold(z, l);
+          z = fBoxFold(z, l * c.w);
         }
         r = length(z);
 
@@ -67,11 +64,12 @@
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float d1 = sdFunc_Frac(p, _Mandel, _Rotate, _BoxFold);
+        float d1 = sdFunc_Frac(p, _Mandel, _BoxFold);
         return d1;
       }
 
       float2 uvFunc(float3 p) {
+        p = p / length(p);
         return uvFuncBox(p);
       }
 
