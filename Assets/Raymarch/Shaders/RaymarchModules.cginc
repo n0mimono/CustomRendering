@@ -306,10 +306,17 @@ float3 fBoxFold(float3 p, float l) {
   return clamp(p, -l, l) * 2 - p;
 }
 
+float3 fBoxFold(float3 p, float l, inout float3x3 dp) {
+  if (abs(p.x) > l) dp._m00_m10_m20 *= -1;
+  if (abs(p.y) > l) dp._m01_m11_m21 *= -1;
+  if (abs(p.z) > l) dp._m02_m12_m22 *= -1;
+  return clamp(p, -l, l) * 2 - p;
+}
+
 float3 fSphereFold(float3 p, float l2, float m2) {
   float r2 = dot(p,p);
   if (r2 < m2) return p * (l2/m2);
-  else if (r2 > l2) return p * (l2/r2);
+  if (r2 > l2) return p * (l2/r2);
   return p;
 }
 
@@ -317,6 +324,39 @@ float3 fSphereFoldNegative(float3 p, float l2) {
   float r2 = dot(p,p);
   if (r2 > l2) return -p * (l2/r2);
   return p;
+}
+
+float3 fSphereFoldInverse(float3 p, float l2, float m2) {
+  float r2 = dot(p,p);
+  if (r2 < m2) return p * (l2/m2);
+  if (r2 < l2) return p * (l2/r2);
+  return p;
+}
+
+float3 fSphereFoldInverse(float3 p, float l2, float m2, inout float dp) {
+  float r2 = dot(p,p);
+  float s = 1;
+  if (r2 < m2) s = (l2/m2);
+  else if (r2 < l2) s = (l2/r2);
+  dp *= s;
+  return p * s;
+}
+
+float3 fSphereFoldInverse(float3 p, float l2, float m2, inout float3x3 dp) {
+  float r2 = dot(p,p);
+  if (r2 < m2) {
+    float s = (l2/m2);
+    dp *= s;
+    return p * s;
+  } else if (r2 < l2) {
+    float s = (l2/r2);
+    dp._m00_m01_m02 = s*(dp._m00_m01_m02 - p*2*dot(p, dp._m00_m01_m02)/r2);
+    dp._m10_m11_m12 = s*(dp._m10_m11_m12 - p*2*dot(p, dp._m10_m11_m12)/r2);
+    dp._m20_m21_m22 = s*(dp._m20_m21_m22 - p*2*dot(p, dp._m20_m21_m22)/r2);
+    return p * s;
+  } else {
+    return p;
+  }
 }
 
 float3 fTetraFold(float3 p) {
@@ -378,14 +418,33 @@ float sdFractalMandelbulb(float3 p, float bailout, float power) {
 float sdFractalMandelbox(float3 p, float4 t) {
   float3 z = p;
   float dr = 1;
+  float r = 0;
+
   for (int i = 0; i < FRAC_ITERATION; i++) {
     z = fBoxFold(z, t.x);
-    z = fSphereFold(z, t.y, t.z);
-    dr = fSphereFold(float3(dr,0,0), t.y, t.z).x;
+    z = fSphereFoldInverse(z, t.y, t.z, dr);
     z = t.w * z + p;
-    dr = abs(t.w) * dr + 1;
+    dr = dr * abs(t.w) + 1;
   }
-  return length(z)/abs(dr);
+
+  return (length(z))/dr - pow(abs(t.w), 1 - FRAC_ITERATION);
+}
+
+float sdFractalMandelbox(float3 p, float4 t, float bailout, float3 offset) {
+  float3 z = p;
+  float3x3 dz = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  float r = 0;
+
+  for (int i = 0; i < FRAC_ITERATION; i++) {
+    z = fBoxFold(z, t.x, dz);
+    z = fSphereFoldInverse(z, t.y, t.z, dz);
+    z = t.w * z + p * offset;
+    dz *= t.w;
+    dz._m00_m11_m22 += offset;
+    if (length(z) > bailout) break;
+  }
+
+  return dot(z,z) / length(mul(z, dz));
 }
 
 float sdFractalTetrahedron(float3 p, float a, float b) {
