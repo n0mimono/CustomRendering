@@ -1,7 +1,6 @@
 ﻿Shader "Raymarch/World_Fault" {
   Properties {
     _Size ("Size", Vector) = (1,1,1,1)
-    _Mandel ("Mandel", Vector) = (2,14.8,0,1)
     _Box1 ("Box 1", Vector) = (1,1,1,1)
     _Box2 ("Box 2", Vector) = (1,1,1,1)
 
@@ -22,43 +21,23 @@
 
     CGINCLUDE
       float4 _Size;
-      float4 _Mandel;
       float4 _Box1;
       float4 _Box2;
 
       #include "RaymarchModules.cginc"
 
-      float sdFunc_Frac(float3 p, float4 c, float4 t1, float4 t2, float d) {
+      float sdFunc_Frac(float3 p, float4 t1, float4 t2, float d) {
         float3 z = p;
         float dr = 1;
         float r = 0;
 
         p = z;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10; i++) {
+          //z = fOctaFold(abs(z));
           z = fBoxFold(z, t1.x);
           z = fSphereFoldInverse(z, t1.y, t1.z, dr);
           z = t1.w * z + p;
           dr = dr * abs(t1.w) + 1;
-        }
-
-        p = z;
-        float power = c.y;
-        for (int i = 0; i < 1; i++) {
-          z = fOctaFold(z);
-
-          r = length(z);
-          if (r > c.x) break;
-
-          float theta = acos(z.z/r);
-          float phi = atan2(z.y, z.x);
-          dr = pow(r, power-1)*power*dr + 1;
-
-          float zr = pow(r, power);
-          theta = theta * power;
-          phi = phi * power;
-
-          z = zr*float3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
-          z += p;
         }
 
         p = z;
@@ -77,15 +56,18 @@
       float distFunc(float3 p) {
         p = trScale(p, _Size.xyz / _Size.w);
 
-        float d1 = sdFunc_Frac(p, _Mandel, _Box1, _Box2, 5);
+        float d1 = sdFunc_Frac(p, _Box1, _Box2, 5);
         return d1;
       }
 
       float2 uvFunc(float3 p) {
-        p = p / length(p);
         return uvFuncBox(p);
       }
+      float4 albedoFunc(float4 buf, float3 p, float d, float i) {
+        return buf;
+      }
 
+      #define ALBEDO_FUNC albedoFunc
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_OBJECTSPACE 0
