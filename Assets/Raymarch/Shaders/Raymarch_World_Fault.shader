@@ -33,8 +33,9 @@
 
         p = z;
         for (int i = 0; i < 10; i++) {
-          //z = fOctaFold(abs(z));
+          //z = fTetraFold(abs(z));
           z = fBoxFold(z, t1.x);
+          z = fTetraFold(abs(z));
           z = fSphereFoldInverse(z, t1.y, t1.z, dr);
           z = t1.w * z + p;
           dr = dr * abs(t1.w) + 1;
