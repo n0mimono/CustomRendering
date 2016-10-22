@@ -22,9 +22,6 @@
       float4 _Size;
       float4 _Mandel;
 
-      #define USE_CLIP_THRESHOLD 1
-      #define CLIP_THRESHOLD 3
-      #define RAY_ITERATION 64 // 128
       #define FRAC_ITERATION 6
       #include "RaymarchModules.cginc"
 
@@ -90,6 +87,11 @@
       #define DIST_FUNC distFunc
       #define UV_FUNC uvFunc
       #define USE_OBJECTSPACE 0
+      #define NORMAL_PRECISION 0.01
+      #define CHECK_CONV_BY_CLIP_THRESHOLD 1
+      #define USE_CLIP_THRESHOLD 1
+      #define CLIP_THRESHOLD 3
+      #define RAY_ITERATION 64 // 128
       #include "RaymarchCore.cginc"
     ENDCG
 

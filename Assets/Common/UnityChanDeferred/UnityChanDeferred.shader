@@ -2,7 +2,7 @@
   Properties {
     _MainTex ("Albedo Map", 2D) = "white" {}
     _BumpTex ("Normal Map", 2D) = "bump" {}
-    _Specular ("Specular", Color) = (1,1,1,1)
+    _SpecularGloss ("Specular/Gloss", Color) = (0,0,0,0)
     _Emission ("Emission", Color) = (1,1,1,1)
     _Tint ("Tint", Color) = (1,1,1,1)
     _Ambient ("Ambient", Range(0,1)) = 0

@@ -47,7 +47,7 @@
         float4 emission = tex2D(_CameraGBufferTexture3, i.uv.xy);
 
         // vector reconstruction
-        float3 normalDir = normal * 2 - 1;
+        float3 normalDir = normal.xyz * 2 - 1;
         float3 viewDir   = calcView(i.uv.xy, depth);
 
         // main color

@@ -8,7 +8,7 @@ using System;
 public class DecalObjectRenderManager : MonoBehaviour {
   
   private Dictionary<Camera, CommandBuffer> buffers = new Dictionary<Camera, CommandBuffer>();
-  private static readonly CameraEvent TargetCameraEvent = CameraEvent.BeforeLighting;
+  protected virtual CameraEvent TargetCameraEvent { get { return CameraEvent.BeforeLighting; } }
 
   protected HashSet<DecalObject> objects = new HashSet<DecalObject>();
 

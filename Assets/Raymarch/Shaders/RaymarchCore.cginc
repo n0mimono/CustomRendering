@@ -24,8 +24,28 @@
 #define CLIP_THRESHOLD 0.01
 #endif
 
+#ifndef CHECK_CONV_BY_CLIP_THRESHOLD
+#define CHECK_CONV_BY_CLIP_THRESHOLD 0
+#endif
+
 #ifndef DIST_FUNC
 #define DIST_FUNC distFuncTrial
+#endif
+
+#ifndef ALBEDO_FUNC
+#define ALBEDO_FUNC albedoFuncBase
+#endif
+
+#ifndef SPECULAR_FUNC
+#define SPECULAR_FUNC specularFuncBase
+#endif
+
+#ifndef EMISSION_FUNC
+#define EMISSION_FUNC emissionFuncBase
+#endif
+
+#ifndef NORMAL_FUNC
+#define NORMAL_FUNC normalFuncBase
 #endif
 
 #ifndef UV_FUNC
@@ -82,11 +102,12 @@ float4    _Emission;
 
 float3 pointToNormal(float3 p){
   float d = NORMAL_PRECISION;
-  return normalize(float3(
+  float3 n = float3(
     DIST_FUNC(p + float3(  d, 0.0, 0.0)) - DIST_FUNC(p + float3( -d, 0.0, 0.0)),
     DIST_FUNC(p + float3(0.0,   d, 0.0)) - DIST_FUNC(p + float3(0.0,  -d, 0.0)),
     DIST_FUNC(p + float3(0.0, 0.0,   d)) - DIST_FUNC(p + float3(0.0, 0.0,  -d))
-  ));
+  );
+  return normalize(n);
 }
 
 float3 unscaler() {
@@ -110,7 +131,7 @@ float3 toLocal(float3 p) {
   float3 q = mul(unity_WorldToObject, float4(p,1)).xyz;
   return q * scaler() + _LocalOffset.xyz;
 #else
-  return p;
+  return p + _LocalOffset.xyz;;
 #endif
 }
 
@@ -119,7 +140,7 @@ float3 toWorld(float3 p) {
   float3 q = (p - _LocalOffset.xyz) * unscaler();
   return mul(unity_ObjectToWorld, float4(q,1)).xyz;
 #else
-  return p;
+  return p - _LocalOffset.xyz;;
 #endif
 }
 
@@ -144,8 +165,10 @@ float3x3 normToOrth(float3 n) {
 }
 
 float worldToDepth(float3 p) {
-  float z = length(p - _WorldSpaceCameraPos.xyz);
-  return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
+  float4 vp = mul(UNITY_MATRIX_VP, float4(p, 1));
+  return vp.z / vp.w * 0.5 + 0.5;
+  //float z = length(p - _WorldSpaceCameraPos.xyz);
+  //return (1.0 - z * _ZBufferParams.w) / (z * _ZBufferParams.z);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,18 +207,24 @@ struct gbuffer_out {
   #endif
 };
 
-void raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float localDist) {
+float raymarch(float3 localPos, float3 viewDir, out float3 localRayPos, out float localDist) {
   float3 ray    = -viewDir;
   float3 rayPos = localPos;
 
   float dist = 0;
-  for (int i = 0; i < RAY_ITERATION; i++) {
+  int i;
+  for (i = 0; i < RAY_ITERATION; i++) {
     dist = DIST_FUNC(rayPos);
     rayPos += ray * dist * _RayDamp;
+    #if CHECK_CONV_BY_CLIP_THRESHOLD
+    if (dist <= 0) break;
+    #endif
   }
 
   localRayPos = rayPos;
   localDist   = dist;
+
+  return (float)i/(float)RAY_ITERATION;
 }
 
 gbuffer_out frag_raymarch (v2f_raymarch i) {
@@ -205,7 +234,7 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
 
   float3 rayPos;
   float dist;
-  raymarch(localPos, viewDir, rayPos, dist);
+  float conv = raymarch(localPos, viewDir, rayPos, dist);
 
   #if USE_CLIP_THRESHOLD
   clip(CLIP_THRESHOLD - dist);
@@ -230,10 +259,10 @@ gbuffer_out frag_raymarch (v2f_raymarch i) {
   float3 worldBump = mul(localBump, normToOrth(worldNormal));
 
   gbuffer_out g;
-  g.albedo   = tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex));
-  g.specular = _SpecularGloss;
-  g.normal   = float4(worldBump * 0.5 + 0.5,1);
-  g.emission = _Emission;
+  g.albedo   = ALBEDO_FUNC(tex2D(_MainTex, TRANSFORM_TEX(uv, _MainTex)), rayPos, dist, conv);
+  g.specular = SPECULAR_FUNC(_SpecularGloss, rayPos, dist, conv);
+  g.normal   = NORMAL_FUNC(float4(worldBump * 0.5 + 0.5,1), rayPos, dist, conv);
+  g.emission = EMISSION_FUNC(_Emission, rayPos, dist, conv);
 
   #if OUT_DEPTH
   g.depth = worldToDepth(toWorld(rayPos));
@@ -288,6 +317,52 @@ void frag_raymarch_caster (
   outColor = float4(0,0,0,0);
   float4 vp = mul(UNITY_MATRIX_VP, float4(toWorld(rayPos), 1));
   outDepth = (vp.z / vp.w + 1) * 0.5;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// Procedual texture 
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+struct texture_out {
+  float4 albedo;
+  float4 specular;
+  float4 normal;
+  float4 emission;
+};
+
+texture_out texture_raymarch (float4 coord) {
+  float3 localCameraPos = float3(0,0,-1 * coord.w);
+  float3 localPos       = float3(coord.xy * 2 - 1, coord.z);
+  float3 viewDir        = normalize(localCameraPos - localPos);
+
+  float3 rayPos;
+  float dist;
+  float conv = raymarch(localPos, viewDir, rayPos, dist);
+
+  bool isClip = false;
+  #if USE_CLIP_THRESHOLD
+  isClip = CLIP_THRESHOLD - dist < 0 ? true : isClip;
+  #endif
+  isClip = isnan(dist) ? true : isClip;
+
+  float3 localNormal = pointToNormal(rayPos);
+
+  texture_out g;
+  if (isClip) {
+    g.albedo   = float4(0,0,0,0);
+    g.specular = float4(0,0,0,0);
+    g.normal   = float4(0.5,0.5,1,1);
+    g.emission = float4(0,0,0,0);
+  } else {
+    g.albedo   = ALBEDO_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+    g.specular = SPECULAR_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+    g.normal   = NORMAL_FUNC(float4(-1 * localNormal * 0.5 + 0.5,1), rayPos, dist, conv);
+    g.emission = EMISSION_FUNC(float4(1,1,1,1), rayPos, dist, conv);
+  }
+
+  return g;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
