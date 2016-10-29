@@ -51,7 +51,6 @@ public class BookWorldManager : MonoBehaviour {
 
   void CheckActiveScene() {
     int nextScene = Mathf.FloorToInt (book.curPageNumber / 2f);
-    nextScene = nextScene % scenes.Length;
 
     if (curScene != nextScene) {
       SetActiveScene (curScene, false);
@@ -61,7 +60,7 @@ public class BookWorldManager : MonoBehaviour {
   }
 
   private void SetActiveScene(int index, bool isActive) {
-    if (index < 0) return;
+    index = (index + scenes.Length) % scenes.Length;
 
     foreach (GameObject go in scenes [index].GetRootGameObjects ()) {
       go.SetActive (isActive);

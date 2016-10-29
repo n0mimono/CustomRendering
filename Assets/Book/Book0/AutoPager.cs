@@ -23,7 +23,7 @@ public class AutoPager : MonoBehaviour {
       // adhoc customize...
       int p = (int)(Mathf.Floor (curPageNumber));
       if (p % 2 == 0) {
-        yield return new WaitForSeconds (1f);
+        yield return new WaitForSeconds (0.5f);
       } else {
         yield return new WaitForSeconds (8f);
       }
