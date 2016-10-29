@@ -61,7 +61,7 @@ public class BookWorldManager : MonoBehaviour {
   }
 
   private void SetActiveScene(int index, bool isActive) {
-    if (index < 1) return;
+    if (index < 0) return;
 
     foreach (GameObject go in scenes [index].GetRootGameObjects ()) {
       go.SetActive (isActive);

@@ -3,7 +3,7 @@ using System.Collections;
 
 [RequireComponent(typeof(Book))]
 public class AutoPager : MonoBehaviour {
-
+  
 	private float curPageNumber {
 		set {
 			GetComponent<Book> ().curPageNumber = value;
@@ -20,9 +20,16 @@ public class AutoPager : MonoBehaviour {
 		while (true) {
 			yield return null;
 
+      // adhoc customize...
+      int p = (int)(Mathf.Floor (curPageNumber));
+      if (p % 2 == 0) {
+        yield return new WaitForSeconds (1f);
+      } else {
+        yield return new WaitForSeconds (8f);
+      }
+
 			yield return StartCoroutine (TurnPage());
 
-			yield return new WaitForSeconds (2f);
 		}
 	}
 
