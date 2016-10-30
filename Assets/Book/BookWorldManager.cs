@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class BookWorldManager : MonoBehaviour {
+
   [Header("Component")]
-  public Camera   mainCamera;
-  public Book     book;
+  public Camera        mainCamera;
+  public Book          book;
+  public AutoPager     pager;
+  public FrameRecorder recorder;
 
   [Header("Book")]
   public Texture  separator;
@@ -42,6 +45,8 @@ public class BookWorldManager : MonoBehaviour {
     }
 
     mainCamera.enabled = true;
+    recorder.isReady   = true;
+    pager.isReady      = true;
 
     while (true) {
       CheckActiveScene ();

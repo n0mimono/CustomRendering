@@ -3,6 +3,8 @@ using System.Collections;
 
 [RequireComponent(typeof(Camera))]
 public class FrameRecorder : MonoBehaviour {
+  public float wait    = 0.5f;
+  public bool  isReady = true;
 
   private const int    FrameRate = 30;
   private const string SaveDir = "ScreenShots";
@@ -10,7 +12,6 @@ public class FrameRecorder : MonoBehaviour {
 
   private int   width  = 1920;
   private int   height = 1080;
-  private float wait   = 0.5f;
 
   private RenderTexture rt;
   private Texture2D     tex;
@@ -24,7 +25,9 @@ public class FrameRecorder : MonoBehaviour {
     cam  = GetComponent<Camera> ();
     rt   = new RenderTexture (width, height, 24);
     tex  = new Texture2D (width, height, TextureFormat.RGB24, false);
+
     yield return new WaitForSeconds (wait);
+    yield return new WaitUntil (() => isReady);
 
     Debug.Log ("Start Record");
     for (int t = 0;; t++) {
