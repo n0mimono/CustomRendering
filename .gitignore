@@ -11,13 +11,17 @@
 /*.pidb
 /*.booproj
 
+# standard asset
 /Assets/Editor.meta
 /Assets/Editor/
 /Assets/Standard Assets.meta
 /Assets/Standard Assets/
 
-/Assets/Textures.meta
-/Assets/Textures/
+# extra resources
+/Assets/Book/Textures.meta
+/Assets/Book/Textures/
 
+# buit-in shaders
 /Assets/CGIncludes/
 /Assets/CGIncludes.meta
+
