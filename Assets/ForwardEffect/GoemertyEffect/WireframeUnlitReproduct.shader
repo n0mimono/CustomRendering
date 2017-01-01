@@ -1,4 +1,4 @@
-Shader "Wireframe/UnlitWorld" {
+Shader "Wireframe/UnlitReproduct" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
 
@@ -15,6 +15,7 @@ Shader "Wireframe/UnlitWorld" {
     _RimAmplitude ("Rim Amplitude", Float) = 1
     _RimTint ("Rim Tint", Color) = (1,1,1,1)
   }
+
   SubShader {
     Tags { "RenderType"="Transparent" "Queue"="Transparent" }
     LOD 100
@@ -113,8 +114,9 @@ Shader "Wireframe/UnlitWorld" {
       Blend SrcAlpha OneMinusSrcAlpha
 
       CGPROGRAM
-      #pragma target 3.0
+      #pragma target 4.0
       #pragma vertex vert
+      #pragma geometry geo
       #pragma fragment frag
       #pragma multi_compile_fog
       #include "UnityCG.cginc"
@@ -144,13 +146,47 @@ Shader "Wireframe/UnlitWorld" {
 
       v2f vert (appdata v) {
         v2f o;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = v.vertex;
         o.uv     = TRANSFORM_TEX(v.uv, _MainTex);
         o.wpos   = mul(unity_ObjectToWorld, v.vertex);
         o.color  = v.color;
-        o.normal = UnityObjectToWorldNormal(v.normal);
-        UNITY_TRANSFER_FOG(o,o.vertex);
+        o.normal = v.normal;
         return o;
+      }
+
+      float halpha(float y) {
+        return pow(saturate(y) + _HeightOffset, _HeightPower);
+      }
+
+      float3 twist(float3 p, float power){
+        float s = sin(power * p.y);
+        float c = cos(power * p.y);
+        float3x3 m = float3x3(
+            c, -s, 0,
+            s, c,  0,
+            0, 0,  1
+         );
+         return mul(m, p);
+      }
+
+      [maxvertexcount(21)]
+      void geo(triangle v2f v[3], inout TriangleStream<v2f> TriStream) {
+        float3 normal = normalize(v[0].normal + v[1].normal + v[2].normal);
+        float t = max(0,sin(_Time.y));
+
+        for (int i = 0; i < 3; i++) {
+          v2f o = v[i];
+          float origin = v[i].vertex.xyz;
+          v[i].vertex.xyz += normal * t;
+          v[i].vertex.xyz = twist(v[i].vertex.xyz, 5 * t);
+
+          o.vertex = mul(UNITY_MATRIX_MVP, v[i].vertex);
+          o.normal = UnityObjectToWorldNormal(v[i].normal);
+
+          UNITY_TRANSFER_FOG(o,o.vertex);
+          TriStream.Append(o);
+        }
+        TriStream.RestartStrip();
       }
 
       fixed4 frag (v2f i) : SV_Target {
@@ -159,13 +195,13 @@ Shader "Wireframe/UnlitWorld" {
         float NNdotV = 1 - dot(normalDir, viewDir);
         float rim = pow(NNdotV, _RimPower) * _RimAmplitude;
 
-        float alpha = pow(saturate(i.wpos.y + _HeightOffset), _HeightPower);
+        float alpha = halpha(i.wpos.y);
 
         float4 col = tex2D(_MainTex, i.uv) * i.color;
         col.rgb = col.rgb * _RimTint.a + rim * _RimTint.rgb;
         col.a *= alpha;
 
-        UNITY_APPLY_FOG(i.fogCoord, col);
+        //UNITY_APPLY_FOG(i.fogCoord, col);
         return col;
       }
       ENDCG
