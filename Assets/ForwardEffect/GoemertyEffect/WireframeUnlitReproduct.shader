@@ -172,12 +172,12 @@ Shader "Wireframe/UnlitReproduct" {
       [maxvertexcount(21)]
       void geo(triangle v2f v[3], inout TriangleStream<v2f> TriStream) {
         float3 normal = normalize(v[0].normal + v[1].normal + v[2].normal);
-        float t = max(0,sin(_Time.y));
+        float t = max(0,sin(_Time.y * 0.5));
 
         for (int i = 0; i < 3; i++) {
           v2f o = v[i];
           float origin = v[i].vertex.xyz;
-          v[i].vertex.xyz += normal * t;
+          v[i].vertex.xyz += normal * t * (1 + 5 * v[i].vertex.y);
           v[i].vertex.xyz = twist(v[i].vertex.xyz, 5 * t);
 
           o.vertex = mul(UNITY_MATRIX_MVP, v[i].vertex);
