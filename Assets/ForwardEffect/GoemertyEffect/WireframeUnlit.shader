@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Wireframe/Unlit" {
   Properties {
     _Color ("Color", Color) = (1,1,1,1)
@@ -44,7 +46,7 @@ Shader "Wireframe/Unlit" {
       void geo(triangle v2g v[3], inout TriangleStream<g2f> TriStream) {
         for (int i = 0; i < 3; i++) {
           g2f o;
-          o.vertex = mul(UNITY_MATRIX_MVP, v[i].vertex);
+          o.vertex = UnityObjectToClipPos(v[i].vertex);
           o.color  = float4(1,0,0,0.0);
           TriStream.Append(o);
         }
@@ -58,28 +60,28 @@ Shader "Wireframe/Unlit" {
           float3 dir = normalize((v1.vertex.xyz + v2.vertex.xyz) * 0.5 - vb.vertex.xyz);
 
           g2f o;
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           o.color  = _Color;
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz, 1));
           o.color  = _Color;
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           o.color  = _Color;
           TriStream.Append(o);
           TriStream.RestartStrip();
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           o.color  = _Color;
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz + dir * _Width, 1));
           o.color  = _Color;
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           o.color  = _Color;
           TriStream.Append(o);
           TriStream.RestartStrip();

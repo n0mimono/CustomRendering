@@ -1,4 +1,6 @@
-﻿Shader "Book/Box" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Book/Box" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Texture", 2D) = "white" {}
@@ -20,7 +22,7 @@
 		v2f vert(appdata_full v) {
 		  v2f o;
 			o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.pos = UnityObjectToClipPos(v.vertex);
 		  return o;
 		}
 

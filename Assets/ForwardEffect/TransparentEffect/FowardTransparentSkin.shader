@@ -1,4 +1,6 @@
-﻿Shader "Forward/ForwardTransparentSkin" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Forward/ForwardTransparentSkin" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     _Alpha ("Alpha", Range(0, 1)) = 1
@@ -26,7 +28,7 @@
       
       v2f vert (appdata v) {
         v2f o;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.uv = TRANSFORM_TEX(v.uv, _MainTex);
         UNITY_TRANSFER_FOG(o,o.vertex);
         return o;

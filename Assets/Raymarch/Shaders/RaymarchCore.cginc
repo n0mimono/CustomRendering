@@ -1,4 +1,6 @@
-﻿
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef RAYMARCH_CORE
 #define RAYMARCH_CORE
@@ -185,7 +187,7 @@ struct v2f_raymarch {
 
 v2f_raymarch vert_raymarch (appdata_base v) {
   v2f_raymarch o;
-  o.pos      = mul(UNITY_MATRIX_MVP, v.vertex);
+  o.pos      = UnityObjectToClipPos(v.vertex);
   o.vertex   = v.vertex;
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   return o;

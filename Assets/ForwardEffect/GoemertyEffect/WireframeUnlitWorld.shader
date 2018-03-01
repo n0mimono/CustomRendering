@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Wireframe/UnlitWorld" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
@@ -71,28 +73,28 @@ Shader "Wireframe/UnlitWorld" {
           g2f o;
           o.color  = _Color * v[0].color;
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
           TriStream.RestartStrip();
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
           TriStream.RestartStrip();
@@ -144,7 +146,7 @@ Shader "Wireframe/UnlitWorld" {
 
       v2f vert (appdata v) {
         v2f o;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.uv     = TRANSFORM_TEX(v.uv, _MainTex);
         o.wpos   = mul(unity_ObjectToWorld, v.vertex);
         o.color  = v.color;
