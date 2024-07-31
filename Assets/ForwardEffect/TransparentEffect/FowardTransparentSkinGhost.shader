@@ -1,4 +1,6 @@
-﻿Shader "Forward/ForwardTransparentSkinGhost" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Forward/ForwardTransparentSkinGhost" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
     _Alpha ("Alpha", Range(0, 1)) = 1
@@ -55,7 +57,7 @@
 
       v2f vert (appdata v) {
         v2f o;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.uv = TRANSFORM_TEX(v.uv, _MainTex);
         o.normal = UnityObjectToWorldNormal(v.normal);
         o.worldPos = mul(unity_ObjectToWorld, v.vertex);

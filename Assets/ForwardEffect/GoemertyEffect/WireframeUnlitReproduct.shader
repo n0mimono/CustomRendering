@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Wireframe/UnlitReproduct" {
   Properties {
     _MainTex ("Texture", 2D) = "white" {}
@@ -72,28 +74,28 @@ Shader "Wireframe/UnlitReproduct" {
           g2f o;
           o.color  = _Color * v[0].color;
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
           TriStream.RestartStrip();
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v1.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v1.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, float4(v2.vertex.xyz + dir * _Width, 1));
+          o.vertex = UnityObjectToClipPos(float4(v2.vertex.xyz + dir * _Width, 1));
           UNITY_TRANSFER_FOG(o,o.vertex);
           TriStream.Append(o);
           TriStream.RestartStrip();
@@ -180,7 +182,7 @@ Shader "Wireframe/UnlitReproduct" {
           v[i].vertex.xyz += normal * t * (1 + 5 * v[i].vertex.y);
           v[i].vertex.xyz = twist(v[i].vertex.xyz, 5 * t);
 
-          o.vertex = mul(UNITY_MATRIX_MVP, v[i].vertex);
+          o.vertex = UnityObjectToClipPos(v[i].vertex);
           o.normal = UnityObjectToWorldNormal(v[i].normal);
 
           UNITY_TRANSFER_FOG(o,o.vertex);

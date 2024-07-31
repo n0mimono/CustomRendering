@@ -1,4 +1,6 @@
-﻿Shader "Paint/Painter" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Paint/Painter" {
 	Properties {
     _Color ("Color", Color) = (1,1,1,1)
     _SpecularGloss ("Specular Gloss", Color) = (1,1,1,1)
@@ -31,7 +33,7 @@
 			
 			v2f vert (float3 v: POSITION) {
 				v2f o;
-				o.pos = mul(UNITY_MATRIX_MVP, float4(v, 1));
+				o.pos = UnityObjectToClipPos(float4(v, 1));
         o.spos = ComputeScreenPos(o.pos);
         o.ray = mul(UNITY_MATRIX_MV, float4(v, 1)).xyz * float3(-1, -1, 1);
         o.orientation = mul((float3x3)unity_ObjectToWorld, float3(0, 1, 0));

@@ -1,4 +1,6 @@
-﻿Shader "UnityChan/UnityChanDeffered" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "UnityChan/UnityChanDeffered" {
   Properties {
     _MainTex ("Albedo Map", 2D) = "white" {}
     _BumpTex ("Normal Map", 2D) = "bump" {}
@@ -38,7 +40,7 @@
       v2f vert(appdata_full v) {
         v2f o;
 
-        o.pos       = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.pos       = UnityObjectToClipPos(v.vertex);
         o.uv        = v.texcoord;
         o.normal    = UnityObjectToWorldNormal(v.normal);
         o.tangent   = normalize(mul(unity_ObjectToWorld, float4(v.tangent.xyz, 0)).xyz);

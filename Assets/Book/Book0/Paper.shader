@@ -1,4 +1,6 @@
-﻿Shader "Book/Paper" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Book/Paper" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
 		_BackTex ("Sub Texture", 2D) = "black" {}
@@ -55,7 +57,7 @@
 			o.uv.xy = 1 - o.uv.xy;
 
 			float4 vertex = o.uv.x <= 0.5 ? v.vertex : turn_page(v.vertex);
-			o.pos = mul(UNITY_MATRIX_MVP, vertex);
+			o.pos = UnityObjectToClipPos(vertex);
 
 			return o;
 		}
@@ -66,7 +68,7 @@
 		    o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 		    o.uv.y = 1 - o.uv.y;
 
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.pos = UnityObjectToClipPos(v.vertex);
 
 		    return o;
 		}
